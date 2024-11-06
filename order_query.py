@@ -1,5 +1,4 @@
 import math
-import random
 from datetime import datetime
 
 import numpy as np
@@ -277,7 +276,8 @@ class OrderQueryPage(BasePage):
                              "Drehrichtung", "Drehzahl"],
             "Toleranzprüfung": ["Luftschall-Summegrenzwert",
                                 "Luftschall-Summe-Straffrequenz",
-                                "Luftschall-Summe-Endfrequenz"]
+                                "Luftschall-Summe-Endfrequenz",
+                                "Luftschall-Terzgrenzwert",]
         }
 
         # 创建每个部分的框架
@@ -389,8 +389,10 @@ class OrderQueryPage(BasePage):
                         entry.insert(0, current_time)
                     if section == "Dokumentation" and label == "Fertigungsdatum":
                         value = data_dict.get(label, "")
-                        if value:
+                        try:
                             value = pd.to_datetime(value, errors='coerce').strftime('%Y-%m-%d')
+                        except Exception as e:
+                            value = ""
                         entry.insert(0, value)  # 填充数据
                     else:
                         entry.insert(0, data_dict.get(label, ""))  # 填充数据
