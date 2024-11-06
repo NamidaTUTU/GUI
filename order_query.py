@@ -239,6 +239,7 @@ class OrderQueryPage(BasePage):
         # row_data = self.df[self.df["Prüfnummer"] == test_id]
         # 转字典
         data_dict = data.to_dict(orient="records")[0]
+
         typ = data_dict["Typ"]
         if typ.startswith("P"):
             self.pump_detail(data_dict)
@@ -629,8 +630,10 @@ class OrderQueryPage(BasePage):
                     # 检查原始列是否存在于 DataFrame 中
                     if original_col in self.df.columns:
                         self.df[new_col] = self.df[original_col]
+                # 将所有数据转换为字符串
+                self.df = self.df.astype(str)
                 # Sachnummer 全部转换为string, 部分是int,导致query会查不到
-                self.df["Sachnummer"] = self.df["Sachnummer"].astype(str)
+                # self.df["Sachnummer"] = self.df["Sachnummer"].astype(str)
 
                 self.display_df = self.df
                 self.current_page = 1  # 重置到第一页
