@@ -10,6 +10,7 @@ from base_page import BasePage
 
 
 class OrderQueryPage(BasePage):
+
     def __init__(self, notebook):
         super().__init__(notebook)
         # Dokumentation：
