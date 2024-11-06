@@ -1,0 +1,54 @@
+#mapping
+##1.Dokumentation
+#1.Kunde=="Kunde"
+#2.Typ-Kurzbezeichnung=="Typ-Kurzbezeichnung"
+#3.Sachnummer(SNR)=="Sachnummer(SNR)"
+#4.Fetigungsdatum==“Fertigungsdatum”（年月日形式）
+#5.Prüfung=="Prüfung"(可能性为A/Q/S/0)
+#6.Prüfer=="Prüfer"
+#7.Prüfdatum=="系统当天日期"
+##Prüfling
+#1.Prüfling-NR.:=="Sachnummer(SNR)得后六位(比如02450V)_Fertigungsdatum(比如241105)_Werkstatt(比如W318)_Prüfung(比如S)_Arbeitspunkt(比如AP1)_Teil-Nr.(比如N01)" 是由这六部分值通过_拼凑而成
+##Prüfaufbau
+#1.Prüfaufbau=="Prüfaufbau"
+#2.Messaufbau=="Messaufbau"
+##Prüfvorgaben
+#1.Prüfvorschrift=="Prüfvorschrift"
+#2.Fördermedium=="Fördermedium"
+#3.Prüf-Spannung=="Prüf-Spannung"(单位V)
+#4.Testdauer=="Testdauer"(单位s)
+#5.Prüf-Art=="Prüf-Art"
+#6.Luftschall - Meßabstand=="Luftschall - Meßabstand"(单位cm)
+#7.umgerechnet auf=="umgerechnet auf"(单位cm)
+#8.Förderdruck / Differenzdruck=="Förderdruck / Differenzdruck"(单位kPa)
+#9.Durchfluß=="Durchfluß"(单位l/h)
+##Toleranzprüfung
+#1.Luftschall-Summengrenzwert=="Luftschall-Summengrenzwert"
+#2.Luftschall-Summe-Startfrequenz=="Luftschall-Summe-Startfrequenz"(单位Hz)
+#3.Luftschall-Summe-Endfrequenz=="Luftschall-Summe-Endfrequenz"(单位Hz)
+#4.Luftschall-Terzgrenzwert=="Luftschall-Terzgrenzwert"
+#5.Luftschall-Terz-Startfrequenz=="Luftschall-Terz-Startfrequenz"(单位Hz)
+#6.Luftschall-Terz-Endfrequenz=="Luftschall-Terz-Endfrequenz"(单位Hz)
+#7.Triax-Summengrenzwert=="Triax-Summengrenzwert"
+#8.Triax-Summe-Startfrequenz=="Triax-Summe-Startfrequenz"(单位Hz)
+#9.Triax-Summe-Endfrequenz=="Triax-Summe-Endfrequenz"(单位Hz)
+#10.Triax-Terzgrenzwert=="Triax-Terzgrenzwert"
+#11.Triax-Terz-Startfrequenz=="Triax-Terz-Startfrequenz"(单位Hz)
+#12.Triax-Terz-Endfrequenz=="Triax-Terz-Endfrequenz"(单位Hz)
+
+
+GUI中显示为：
+左到右分别为
+1.Prüfnummer=="Arbeitspunkt"
+2.Sachnummer=="Sachnummer(SNR)"  ##这里因为之前只有电机，现在有泵得加入，你可以把我之前代码得Motorsachnummer替换为Sachnummer
+3.Fertigungsdatum=="Fertigungsdatum"  ##之前这里我放的是Prüfdatum你可以改成Fertigungsdatum，之前这里应该没有逻辑牵扯，改名没啥问题
+4.Type of measurement=="Prüfung"
+5.Musternummer=="Teil-Nr."
+6.PV-Nummer=="Prüfvorschrift"
+
+
+
+
+
+
+

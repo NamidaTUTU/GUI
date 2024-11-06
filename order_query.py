@@ -82,7 +82,7 @@ class OrderQueryPage(BasePage):
             "Motorsachnummer": "Sachnummer",
             "Prüfdatum": "Fertigungsdatum",
             "Kunde": "Kunden",
-            "Typ-Kurzbezeichung": "Typ",
+            "Typ-Kurzbezeichnung": "Typ",
             "Prüfungsdatum": "Prüfdatum",
             "Musternummer": "Musternummer",
             "Prüfling-Nr": "Prüfdatum_Musternummer_W711Bue_空着",
@@ -105,7 +105,6 @@ class OrderQueryPage(BasePage):
         }
 
         self.df = self.generate_mock_data()  # 创建 pandas DataFrame
-        self.df.rename(columns=self.column_mapping, inplace=True)
         self.display_df = pd.DataFrame()  # 用于列表展示的df
         self.display_columns = ["Prüfnummer", "Sachnummer", "Fertigungsdatum", "Type of Measurement",
                                 "Musternummer", "PV-Nummer"]
@@ -240,7 +239,8 @@ class OrderQueryPage(BasePage):
         # row_data = self.df[self.df["Prüfnummer"] == test_id]
         # 转字典
         data_dict = data.to_dict(orient="records")[0]
-        if type_of_measurement.startswith("P"):
+        typ = data_dict["Typ"]
+        if typ.startswith("P"):
             self.pump_detail(data_dict)
         else:
             self.motro_detail(data_dict, test_id)
@@ -254,12 +254,37 @@ class OrderQueryPage(BasePage):
 
         # 不可编辑字段的列表
         readonly_fields = [
-            "Sachnummer", "Kunde", "Typ-Kurzbezeichung", "Prüfer",
-            "Prüfungsdatum", "Musternummer", "Prüfnummer",
-            "Prüfling-Nr", "Prüfvorschrift", "Prüfspannung", "Test dauer",
-            "Prüf-Art", "Mikrofon Abstand", "Drehrichtung", "Drehzahl",
-            "Luftschall-Summegrenzwert",
-            "Luftschall-Summe-Straffrequenz", "Luftschall-Summe-Endfrequenz"
+            "Kunde",
+            "Typ-Kurzbezeichnung",
+            "Sachnummer(SNR)",
+            "Fertigungsdatum",
+            "Prüfung",
+            "Prüfer",
+            "Prüfdatum",
+
+            "Prüfling-Nr",
+            "Bemerkung",
+
+            "Prüfaufbau",
+            "Messaufbau",
+
+            "Prüfvorschrift",
+            "Fördermedium",
+            "Prüf-Spannung",
+            "Testdauer",
+            "Prüf-Art",
+            "Luftschall - Meßabstand",
+            "umgerechnet auf",
+            "Förderdruck / Differenzdruck",
+            "Durchfluß",
+
+            "Luftschall-Summengrenzwert",
+            "Luftschall-Summe-Startfrequenz",
+            "Luftschall-Summe-Endfrequenz",
+            "Luftschall-Terzgrenzwert",
+            "Luftschall-Terz-Startfrequenz",
+            "Luftschall-Terz-Endfrequenz",
+            "Toleranzbewertung",
         ]
 
         # 用于存储所有输入框，以便在保存时提取数据
@@ -267,18 +292,28 @@ class OrderQueryPage(BasePage):
 
         # 设置每个部分的标签和字段
         sections = {
-            "Dokumentation": ["Kunde", "Typ", "Sachnummer",
-                              "Fertigungsdatum", "Type of Measurement", "Prüfer",
+            "Dokumentation": ["Kunde", "Typ-Kurzbezeichnung", "Sachnummer(SNR)",
+                              "Fertigungsdatum", "Prüfung", "Prüfer",
                               "Prüfdatum"],
-            "Prüfling": ["Prüfling-Nr", "Prüfling Bemerkung"],
-            "Prüfaufbau": ["Prüfaufbau", "Prüfaufbau Bemerkung"],
-            "Prüfvorgaben": ["Prüfvorschrift", "Prüfspannung", "Test dauer",
-                             "Prüf-Art", "Mikrofon Abstand",
-                             "Drehrichtung", "Drehzahl"],
-            "Toleranzprüfung": ["Luftschall-Summegrenzwert",
-                                "Luftschall-Summe-Straffrequenz",
+            "Prüfling": ["Prüfling-Nr"],
+            "Prüfaufbau": ["Prüfaufbau", "Messaufbau"],
+            "Prüfvorgaben": ["Prüfvorschrift", "Fördermedium", "Prüf-Spannung",
+                             "Testdauer", "Prüf-Art", "Luftschall - Meßabstand",
+                             "umgerechnet auf", "Förderdruck / Differenzdruck",
+                             "Durchfluß",],
+            "Toleranzprüfung": ["Luftschall-Summengrenzwert",
+                                "Luftschall-Summe-Startfrequenz",
                                 "Luftschall-Summe-Endfrequenz",
-                                "Luftschall-Terzgrenzwert",]
+                                "Luftschall-Terzgrenzwert",
+                                "Luftschall-Terz-Startfrequenz",
+                                "Luftschall-Terz-Endfrequenz",
+                                # "Triax-Summengrenzwert",
+                                # "Triax-Summe-Startfrequenz",
+                                # "Triax-Summe-Endfrequenz",
+                                # "Triax-Terzgrenzwert",
+                                # "Triax-Terz-Startfrequenz",
+                                # "Triax-Terz-Endfrequenz",
+                                ]
         }
 
         # 创建每个部分的框架
@@ -298,19 +333,27 @@ class OrderQueryPage(BasePage):
                                                           column=(idx % 2) * 2,
                                                           padx=5, pady=5,
                                                           sticky=ttk.W)
-                if section == "Prüfaufbau" and label == "Prüfaufbau":
+                if section == "" and label == "":
                     # 添加下拉框
-                    entry = ttk.Combobox(frame_section, width=30,
-                                         values=["Schaum", "frei aufgehängt",
-                                                 "Unter Last"])
+                    entry = ttk.Combobox(frame_section, width=30, values=["Schaum", "frei aufgehängt", "Unter Last"])
                     entry.grid(row=1 + idx // 2, column=(idx % 2) * 2 + 1,
                                padx=5, pady=5)
                     entry.set(data_dict.get(label, ""))
                 else:
                     entry = ttk.Entry(frame_section, width=30)
-                    entry.grid(row=1 + idx // 2, column=(idx % 2) * 2 + 1,
-                               padx=5, pady=5)
-                    entry.insert(0, data_dict.get(label, ""))  # 填充数据
+                    entry.grid(row=1 + idx // 2, column=(idx % 2) * 2 + 1, padx=5, pady=5)
+                    if section == "Dokumentation" and label == "Prüfungsdatum":
+                        current_time = datetime.now().strftime('%Y-%m-%d')
+                        entry.insert(0, current_time)
+                    if section == "Dokumentation" and label == "Fertigungsdatum":
+                        value = data_dict.get(label, "")
+                        try:
+                            value = pd.to_datetime(value, errors='coerce').strftime('%Y-%m-%d')
+                        except Exception as e:
+                            value = ""
+                        entry.insert(0, value)  # 填充数据
+                    else:
+                        entry.insert(0, data_dict.get(label, ""))  # 填充数据
 
                 # 如果是只读字段
                 if label in readonly_fields:
@@ -562,11 +605,15 @@ class OrderQueryPage(BasePage):
                     messagebox.showerror("Error", "Unsupported file format.")
                     return
                 self.df = new_data  # 更新 DataFrame
-                self.df.rename(columns=self.column_mapping, inplace=True)
-                # 增加Index 索引列
-                # self.df.insert(0, "Index", range(1, len(self.df) + 1))
+                # 根据映射生成新的列, 而不是改名字
+                # self.df.rename(columns=self.column_mapping, inplace=True)
+                for original_col, new_col in self.column_mapping.items():
+                    # 检查原始列是否存在于 DataFrame 中
+                    if original_col in self.df.columns:
+                        self.df[new_col] = self.df[original_col]
                 # Sachnummer 全部转换为string, 部分是int,导致query会查不到
                 self.df["Sachnummer"] = self.df["Sachnummer"].astype(str)
+
                 self.display_df = self.df
                 self.current_page = 1  # 重置到第一页
                 self.refresh_table()  # 刷新表格
