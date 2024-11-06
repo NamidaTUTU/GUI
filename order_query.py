@@ -284,7 +284,12 @@ class OrderQueryPage(BasePage):
             "Luftschall-Terzgrenzwert",
             "Luftschall-Terz-Startfrequenz",
             "Luftschall-Terz-Endfrequenz",
-            "Toleranzbewertung",
+            "Triax-Summengrenzwert",
+            "Triax-Summe-Startfrequenz",
+            "Triax-Summe-Endfrequenz",
+            "Triax-Terzgrenzwert",
+            "Triax-Terz-Startfrequenz",
+            "Triax-Terz-Endfrequenz",
         ]
 
         # 用于存储所有输入框，以便在保存时提取数据
@@ -300,19 +305,19 @@ class OrderQueryPage(BasePage):
             "Prüfvorgaben": ["Prüfvorschrift", "Fördermedium", "Prüf-Spannung",
                              "Testdauer", "Prüf-Art", "Luftschall - Meßabstand",
                              "umgerechnet auf", "Förderdruck / Differenzdruck",
-                             "Durchfluß",],
+                             "Durchfluß", ],
             "Toleranzprüfung": ["Luftschall-Summengrenzwert",
+                                "Triax-Summengrenzwert",
                                 "Luftschall-Summe-Startfrequenz",
+                                "Triax-Summe-Startfrequenz",
                                 "Luftschall-Summe-Endfrequenz",
+                                "Triax-Summe-Endfrequenz",
                                 "Luftschall-Terzgrenzwert",
+                                "Triax-Terzgrenzwert",
                                 "Luftschall-Terz-Startfrequenz",
+                                "Triax-Terz-Startfrequenz",
                                 "Luftschall-Terz-Endfrequenz",
-                                # "Triax-Summengrenzwert",
-                                # "Triax-Summe-Startfrequenz",
-                                # "Triax-Summe-Endfrequenz",
-                                # "Triax-Terzgrenzwert",
-                                # "Triax-Terz-Startfrequenz",
-                                # "Triax-Terz-Endfrequenz",
+                                "Triax-Terz-Endfrequenz",
                                 ]
         }
 
@@ -324,34 +329,47 @@ class OrderQueryPage(BasePage):
             frame_section.pack(fill="x", )
 
             # 设置分区标题
-            ttk.Label(frame_section, text=section, font=self.title_font).grid(row=0, column=0,
-                                                                              columnspan=4,
-                                                                              sticky=ttk.W)
+            section_label = ttk.Label(frame_section, text=section, font=self.title_font)
+            section_label.grid(row=0, column=0, columnspan=4, sticky=ttk.W)
             # 水平布局每个字段
             for idx, label in enumerate(labels):
-                ttk.Label(frame_section, text=label).grid(row=1 + idx // 2,
-                                                          column=(idx % 2) * 2,
-                                                          padx=5, pady=5,
-                                                          sticky=ttk.W)
+                t_label = ttk.Label(frame_section, text=label)
+                t_label.grid(row=1 + idx // 2, column=(idx % 2) * 2, padx=5, pady=5, sticky=ttk.W)
                 if section == "" and label == "":
                     # 添加下拉框
                     entry = ttk.Combobox(frame_section, width=30, values=["Schaum", "frei aufgehängt", "Unter Last"])
-                    entry.grid(row=1 + idx // 2, column=(idx % 2) * 2 + 1,
-                               padx=5, pady=5)
+                    entry.grid(row=1 + idx // 2, column=(idx % 2) * 2 + 1, padx=5, pady=5)
                     entry.set(data_dict.get(label, ""))
                 else:
                     entry = ttk.Entry(frame_section, width=30)
                     entry.grid(row=1 + idx // 2, column=(idx % 2) * 2 + 1, padx=5, pady=5)
-                    if section == "Dokumentation" and label == "Prüfungsdatum":
+                    if section == "Dokumentation" and (label == "Prüfdatum" or label == "Prüfungsdatum"):
                         current_time = datetime.now().strftime('%Y-%m-%d')
                         entry.insert(0, current_time)
-                    if section == "Dokumentation" and label == "Fertigungsdatum":
+                    elif section == "Dokumentation" and label == "Fertigungsdatum":
                         value = data_dict.get(label, "")
                         try:
                             value = pd.to_datetime(value, errors='coerce').strftime('%Y-%m-%d')
                         except Exception as e:
                             value = ""
                         entry.insert(0, value)  # 填充数据
+                    elif section == "Prüfling" and label == "Prüfling-Nr":
+                        # "Sachnummer(SNR)得后六位(比如02450V)_Fertigungsdatum(比如241105)_
+                        # Werkstatt(比如W318)_Prüfung(比如S)_Arbeitspunkt(比如AP1)_Teil-Nr.(比如N01)"
+                        # 是由这六部分值通过_拼凑而成
+                        part_one = str(data_dict.get("Sachnummer(SNR)", ""))[:6]
+                        part_two = data_dict.get("Fertigungsdatum", "")
+                        try:
+                            part_two = pd.to_datetime(part_two, errors='coerce').strftime('%Y%m%d')
+                        except Exception as e:
+                            part_two = ""
+                        part_three = data_dict.get("Werkstatt", "")
+                        part_four = data_dict.get("Prüfung", "")
+                        part_five = data_dict.get("Arbeitspunkt", "")
+                        part_six = data_dict.get("Teil-Nr.", "")
+                        value = f"{part_one}_{part_two}_{part_three}_{part_four}_{part_five}_{part_six}"
+                        print("value:", value)
+                        entry.insert(0, value)
                     else:
                         entry.insert(0, data_dict.get(label, ""))  # 填充数据
 
