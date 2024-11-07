@@ -103,7 +103,23 @@ class OrderQueryPage(BasePage):
             "Teil-Nr.": "Musternummer",
             "Prüfvorschrift": "PV-Nummer",
         }
-
+        # 单位字典
+        self.unit_mapping = {
+            "Prüf-Spannung": "V",
+            "Testdauer": "s",
+            "Luftschall - Meßabstand": "cm",
+            "Förderdruck / Differenzdruck": "kPa",
+            "Durchfluß": "I/h",
+            "umgerechnet auf": "cm",
+            "Luftschall-Summe-Startfrequenz": "Hz",
+            "Luftschall-Summe-Endfrequenz": "Hz",
+            "Luftschall-Terz-Startfrequenz": "Hz",
+            "Luftschall-Terz-Endfrequenz": "Hz",
+            "Triax-Summe-Startfrequenz": "Hz",
+            "Triax-Summe-Endfrequenz": "Hz",
+            "Triax-Terz-Startfrequenz": "Hz",
+            "Triax-Terz-Endfrequenz": "Hz",
+        }
         self.df = self.generate_mock_data()  # 创建 pandas DataFrame
         self.display_df = pd.DataFrame()  # 用于列表展示的df
         self.display_columns = ["Prüfnummer", "Sachnummer", "Fertigungsdatum", "Type of Measurement",
@@ -321,13 +337,12 @@ class OrderQueryPage(BasePage):
                                 "Triax-Terz-Endfrequenz",
                                 ]
         }
-
         # 创建每个部分的框架
-        for section, labels in sections.items():
+        for row, (section, labels) in enumerate(sections.items()):
             # 添加分区标题
             frame_section = ttk.Frame(edit_window, relief="groove", borderwidth=2)
             # frame_section.pack(fill="x", padx=10, pady=10)
-            frame_section.pack(fill="x", )
+            frame_section.grid(row=row, column=0, sticky=ttk.NSEW)
 
             # 设置分区标题
             section_label = ttk.Label(frame_section, text=section, font=self.title_font)
@@ -355,37 +370,27 @@ class OrderQueryPage(BasePage):
                         entry.insert(0, current_time)
                     elif section == "Dokumentation" and label == "Fertigungsdatum":
                         value = data_dict.get(label, "")
-                        try:
-                            value = pd.to_datetime(value, errors='coerce').strftime('%Y-%m-%d')
-                        except Exception as e:
-                            value = ""
-                        entry.insert(0, value)  # 填充数据
+                        date_str = self.parse_date(value)
+                        entry.insert(0, date_str)  # 填充数据
                     elif section == "Prüfling" and label == "Prüfling-Nr":
-                        # "Sachnummer(SNR)得后六位(比如02450V)_Fertigungsdatum(比如241105)_
-                        # Werkstatt(比如W318)_Prüfung(比如S)_Arbeitspunkt(比如AP1)_Teil-Nr.(比如N01)"
-                        # 是由这六部分值通过_拼凑而成
-                        part_one = data_dict.get("Sachnummer(SNR)", "")[-6:]
-                        part_two = data_dict.get("Fertigungsdatum", "")
-                        try:
-                            part_two = pd.to_datetime(part_two, errors='coerce').strftime('%Y%m%d')
-                        except Exception as e:
-                            part_two = ""
-                        part_three = data_dict.get("Werkstatt", "")
-                        part_four = data_dict.get("Prüfung", "")
-                        part_five = data_dict.get("Arbeitspunkt", "")
-                        part_six = data_dict.get("Teil-Nr.", "")
-                        value = f"{part_one}_{part_two}_{part_three}_{part_four}_{part_five}_{part_six}"
-                        print("value:", value)
+                        value = self.get_prufling_nr(data_dict)
                         entry.insert(0, value)
                     else:
-                        entry.insert(0, data_dict.get(label, ""))  # 填充数据
+                        value = data_dict.get(label, "")
+                        unit = self.unit_mapping.get(label, "")
+                        entry.insert(0, f"{value} {unit}")  # 填充数据
 
                 # 如果是只读字段
                 if label in readonly_fields:
                     entry.config(state="readonly")
-
                 # 保存每个字段的输入框到 entries 字典中
                 entries[label] = entry
+
+        # 增加按钮, 按钮布局在 sections 的后面
+        generate_user_doc_button = ttk.Button(edit_window, text="Generate UserDoc", width=20,
+                                              command=self.export_hatx_file)
+        generate_user_doc_button['padding'] = (0, 10)  # 设置内边距来增加button高度
+        generate_user_doc_button.grid(row=len(sections) + 1, column=0, padx=0, pady=20)
 
     def motro_detail(self, data_dict, test_id):
         # 创建一个新的窗口
@@ -503,6 +508,33 @@ class OrderQueryPage(BasePage):
         # edit_window.transient(self)
         edit_window.grab_set()
         edit_window.wait_window()
+
+    @staticmethod
+    def get_prufling_nr(data_dict):
+        # "Sachnummer(SNR)得后六位(比如02450V)_Fertigungsdatum(比如241105)_
+        # Werkstatt(比如W318)_Prüfung(比如S)_Arbeitspunkt(比如AP1)_Teil-Nr.(比如N01)"
+        # 是由这六部分值通过_拼凑而成
+        part_one = data_dict.get("Sachnummer(SNR)", "")[-6:]
+        part_two = data_dict.get("Fertigungsdatum", "")
+        try:
+            part_two = pd.to_datetime(part_two, errors='coerce').strftime('%Y%m%d')
+        except Exception as e:
+            part_two = ""
+        part_three = data_dict.get("Werkstatt", "")
+        part_four = data_dict.get("Prüfung", "")
+        part_five = data_dict.get("Arbeitspunkt", "")
+        part_six = data_dict.get("Teil-Nr.", "")
+        value = f"{part_one}_{part_two}_{part_three}_{part_four}_{part_five}_{part_six}"
+        print("value:", value)
+        return value
+
+    @staticmethod
+    def parse_date(value):
+        try:
+            date_str = pd.to_datetime(value, errors='coerce').strftime('%Y-%m-%d')
+        except Exception as e:
+            date_str = ""
+        return date_str
 
     def create_pagination_controls(self):
         # 上一页按钮
@@ -682,59 +714,59 @@ class OrderQueryPage(BasePage):
                 messagebox.showerror("Error",
                                      f"An error occurred while exporting the file:\n{e}")
 
-    # def export_hatx_file(self):
-    #     import clr
-    #     # clr.AddReference("System")
-    #     # import System
-    #     import sys
-    #
-    #     sys.path.append(
-    #         r'C:\Program Files\HEAD System Integration and Extension (ASX)')
-    #     clr.AddReference('HEADacoustics.API.Documentation')
-    #     clr.AddReference('HEADacoustics.API.License')
-    #
-    #     import HEADacoustics.API.Documentation as ASX05
-    #     from HEADacoustics.API.License import License, ProductCode
-    #     license_ = License.Create(
-    #         [ProductCode.ASX_05_DocumentationAndMetadataAPI])
-    #
-    #     # 打开文件保存对话框，限制文件类型为 xlsx 和 csv
-    #     file_path = filedialog.asksaveasfilename(
-    #         defaultextension=".hatx",  # 默认文件扩展名
-    #         filetypes=[("Hatx files", "*.hatx")],
-    #         title="Save the file as"
-    #     )
-    #
-    #     if file_path:
-    #         print(file_path)
-    #         try:
-    #             if not (file_path.endswith('.hatx')):
-    #                 # 根据选定的文件类型自动添加扩展名
-    #                 if file_path.endswith('.hatx'):
-    #                     file_path += '.hatx'
-    #             self.df.rename(columns=self.column_mapping,
-    #                            inplace=True)  # 重命名列
-    #             self.df.fillna("", inplace=True)  # 填充空值
-    #
-    #             hatx_outPath = r'C:\temp\Example'
-    #             inDoc = ASX05.Documentation.Create('Created by API')
-    #
-    #             for index, row in self.df.iterrows():
-    #                 row = row.tolist()
-    #                 for k, v in row.items():
-    #                     textField = ASX05.TextField.Create(k, v)
-    #                     inDoc.AddField(textField)
-    #             isWritten = ASX05.DocumentationWriter.WriteDirectoryDocumentation(
-    #                 inDoc, hatx_outPath)
-    #             license_.Dispose()
-    #             if isWritten:
-    #                 print("数据已成功写入 .hatx 文件！")
-    #                 messagebox.showinfo("Success",
-    #                                     "File exported successfully!")
-    #             else:
-    #                 print("写入 .hatx 文件时出现问题。")
-    #                 messagebox.showerror("Error",
-    #                                      "An error occurred while exporting the file:\n")
-    #         except Exception as e:
-    #             messagebox.showerror("Error",
-    #                                  f"An error occurred while exporting the file:\n{e}")
+    def export_hatx_file(self):
+        import clr
+        # clr.AddReference("System")
+        # import System
+        import sys
+
+        sys.path.append(
+            r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+        clr.AddReference('HEADacoustics.API.Documentation')
+        clr.AddReference('HEADacoustics.API.License')
+
+        import HEADacoustics.API.Documentation as ASX05
+        from HEADacoustics.API.License import License, ProductCode
+        license_ = License.Create(
+            [ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+        # 打开文件保存对话框，限制文件类型为 xlsx 和 csv
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".hatx",  # 默认文件扩展名
+            filetypes=[("Hatx files", "*.hatx")],
+            title="Save the file as"
+        )
+
+        if file_path:
+            print(file_path)
+            try:
+                if not (file_path.endswith('.hatx')):
+                    # 根据选定的文件类型自动添加扩展名
+                    if file_path.endswith('.hatx'):
+                        file_path += '.hatx'
+                self.df.rename(columns=self.column_mapping,
+                               inplace=True)  # 重命名列
+                self.df.fillna("", inplace=True)  # 填充空值
+
+                hatx_outPath = r'C:\temp\Example'
+                inDoc = ASX05.Documentation.Create('Created by API')
+
+                for index, row in self.df.iterrows():
+                    row = row.tolist()
+                    for k, v in row.items():
+                        textField = ASX05.TextField.Create(k, v)
+                        inDoc.AddField(textField)
+                isWritten = ASX05.DocumentationWriter.WriteDirectoryDocumentation(
+                    inDoc, hatx_outPath)
+                license_.Dispose()
+                if isWritten:
+                    print("数据已成功写入 .hatx 文件！")
+                    messagebox.showinfo("Success",
+                                        "File exported successfully!")
+                else:
+                    print("写入 .hatx 文件时出现问题。")
+                    messagebox.showerror("Error",
+                                         "An error occurred while exporting the file:\n")
+            except Exception as e:
+                messagebox.showerror("Error",
+                                     f"An error occurred while exporting the file:\n{e}")
