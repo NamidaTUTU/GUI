@@ -159,8 +159,8 @@ class OrderQueryPage(BasePage):
 
         # 导出hatx文件按钮
         # export_button = ttk.Button(self.inner_frame, text="Export Hatx File", command=self.export_hatx_file)
-        export_button = ttk.Button(self.inner_frame, text="Export Hatx File", )
-        export_button.grid(row=0, column=8, padx=0, pady=10, sticky=ttk.W)
+        # export_button = ttk.Button(self.inner_frame, text="Export Hatx File", )
+        # export_button.grid(row=0, column=8, padx=0, pady=10, sticky=ttk.W)
 
         # 确保顶部框架自动调整大小，分配最小权重
         self.grid_rowconfigure(0, weight=0)
@@ -188,7 +188,7 @@ class OrderQueryPage(BasePage):
         style.configure("Treeview.Heading", background="gray", foreground="black", font=self.title_font, relief="solid")
         # 创建表格容器,放置滚动条
         tabel_frame = ttk.Frame(self.inner_frame)
-        tabel_frame.grid(row=1, column=0, columnspan=9, padx=10, pady=20, sticky=ttk.NSEW)
+        tabel_frame.grid(row=1, column=0, columnspan=8, padx=10, pady=20, sticky=ttk.NSEW)
 
         self.tree = ttk.Treeview(tabel_frame, height=15, columns=self.display_columns, show="headings")
         # 设置列标题
@@ -342,8 +342,14 @@ class OrderQueryPage(BasePage):
                     entry.grid(row=1 + idx // 2, column=(idx % 2) * 2 + 1, padx=5, pady=5)
                     entry.set(data_dict.get(label, ""))
                 else:
-                    entry = ttk.Entry(frame_section, width=30)
+                    # 控制宽度
+                    if section == "Prüfling" and label == "Prüfling-Nr":
+                        width = 60
+                    else:
+                        width = 30
+                    entry = ttk.Entry(frame_section, width=width)
                     entry.grid(row=1 + idx // 2, column=(idx % 2) * 2 + 1, padx=5, pady=5)
+                    # 调整显示的值
                     if section == "Dokumentation" and (label == "Prüfdatum" or label == "Prüfungsdatum"):
                         current_time = datetime.now().strftime('%Y-%m-%d')
                         entry.insert(0, current_time)
@@ -358,7 +364,7 @@ class OrderQueryPage(BasePage):
                         # "Sachnummer(SNR)得后六位(比如02450V)_Fertigungsdatum(比如241105)_
                         # Werkstatt(比如W318)_Prüfung(比如S)_Arbeitspunkt(比如AP1)_Teil-Nr.(比如N01)"
                         # 是由这六部分值通过_拼凑而成
-                        part_one = str(data_dict.get("Sachnummer(SNR)", ""))[:6]
+                        part_one = data_dict.get("Sachnummer(SNR)", "")[-6:]
                         part_two = data_dict.get("Fertigungsdatum", "")
                         try:
                             part_two = pd.to_datetime(part_two, errors='coerce').strftime('%Y%m%d')
