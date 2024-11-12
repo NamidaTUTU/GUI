@@ -731,11 +731,10 @@ class OrderQueryPage(BasePage):
         # 初始化许可证
         license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
 
-        # 定义文件路径
-        outPath = r'C:\temp\test_pumpe.hatx'
-
         # 创建新的文档
         inDoc = ASX05.Documentation.Create('Pumpe_UserDocumentation')
+        # 定义文件路径
+        outPath = r'C:\temp\test_pumpe.hatx'
 
         # 创建主表单 "Dokumentation"
         dokumentation_form = ASX05.Form.Create('Dokumentation')
@@ -790,48 +789,49 @@ class OrderQueryPage(BasePage):
         toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Terz-Endfrequenz', 16000.0))
 
         # 保存文档到指定路径
-        isWritten = ASX05.DocumentationWriter.WriteDirectoryDocumentation(inDoc, outPath)
+        is_written = ASX05.DocumentationWriter.WriteDirectoryDocumentation(inDoc, outPath)
+        print("isWritten:", is_written)
 
         # 释放许可证
         license_.Dispose()
 
+        print(f"数据已成功写入{outPath}")
+        messagebox.showinfo("Success", f"File exported successfully! {outPath}")
+
         # 打开文件保存对话框，限制文件类型为 xlsx 和 csv
-        file_path = filedialog.asksaveasfilename(
-            defaultextension=".hatx",  # 默认文件扩展名
-            filetypes=[("Hatx files", "*.hatx")],
-            title="Save the file as"
-        )
-
-        if file_path:
-            print(file_path)
-            try:
-                if not (file_path.endswith('.hatx')):
-                    # 根据选定的文件类型自动添加扩展名
-                    if file_path.endswith('.hatx'):
-                        file_path += '.hatx'
-                self.df.rename(columns=self.column_mapping,
-                               inplace=True)  # 重命名列
-                self.df.fillna("", inplace=True)  # 填充空值
-
-                hatx_outPath = r'C:\temp\Example'
-                inDoc = ASX05.Documentation.Create('Created by API')
-
-                for index, row in self.df.iterrows():
-                    row = row.tolist()
-                    for k, v in row.items():
-                        textField = ASX05.TextField.Create(k, v)
-                        inDoc.AddField(textField)
-                isWritten = ASX05.DocumentationWriter.WriteDirectoryDocumentation(
-                    inDoc, hatx_outPath)
-                license_.Dispose()
-                if isWritten:
-                    print("数据已成功写入 .hatx 文件！")
-                    messagebox.showinfo("Success",
-                                        "File exported successfully!")
-                else:
-                    print("写入 .hatx 文件时出现问题。")
-                    messagebox.showerror("Error",
-                                         "An error occurred while exporting the file:\n")
-            except Exception as e:
-                messagebox.showerror("Error",
-                                     f"An error occurred while exporting the file:\n{e}")
+        # file_path = filedialog.asksaveasfilename(
+        #     defaultextension=".hatx",  # 默认文件扩展名
+        #     filetypes=[("Hatx files", "*.hatx")],
+        #     title="Save the file as"
+        # )
+        #
+        # if file_path:
+        #     print(file_path)
+        #     try:
+        #         if not file_path.endswith('.hatx'):
+        #             file_path += '.hatx'
+        #         self.df.rename(columns=self.column_mapping,
+        #                        inplace=True)  # 重命名列
+        #         self.df.fillna("", inplace=True)  # 填充空值
+        #
+        #         hatx_outPath = r'C:\temp\Example'
+        #         inDoc = ASX05.Documentation.Create('Created by API')
+        #
+        #         for index, row in self.df.iterrows():
+        #             row = row.tolist()
+        #             for k, v in row.items():
+        #                 textField = ASX05.TextField.Create(k, v)
+        #                 inDoc.AddField(textField)
+        #         isWritten = ASX05.DocumentationWriter.WriteDirectoryDocumentation(inDoc, hatx_outPath)
+        #         license_.Dispose()
+        #         if isWritten:
+        #             print("数据已成功写入 .hatx 文件！")
+        #             messagebox.showinfo("Success",
+        #                                 "File exported successfully!")
+        #         else:
+        #             print("写入 .hatx 文件时出现问题。")
+        #             messagebox.showerror("Error",
+        #                                  "An error occurred while exporting the file:\n")
+        #     except Exception as e:
+        #         messagebox.showerror("Error",
+        #                              f"An error occurred while exporting the file:\n{e}")
