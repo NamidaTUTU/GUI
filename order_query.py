@@ -745,7 +745,10 @@ class OrderQueryPage(BasePage):
         dokumentation_form.TryAddField(ASX05.TextField.Create('Kunde', 'Renault'))
         dokumentation_form.TryAddField(ASX05.TextField.Create('Typ-Kurzbezeichnung', 'PDE'))
         dokumentation_form.TryAddField(ASX05.TextField.Create('Sachnummer (SNR)', '0392025000'))
-        dokumentation_form.TryAddField(ASX05.DateField.Create('Fertigungsdatum Pumpe', '2014.12.13'))
+        date_str = '2014-12-13'
+        fertigungsdatum = datetime.strptime(date_str, '%Y.%m.%d').date()
+        dokumentation_form.TryAddField(ASX05.DateField.Create('Fertigungsdatum Pumpe', fertigungsdatum))
+
         dokumentation_form.TryAddField(ASX05.TextField.Create('Prüfung', 'Null-Serie'))
         dokumentation_form.TryAddField(ASX05.TextField.Create('Prüfer', 'Baessler Andreas'))
         dokumentation_form.TryAddField(ASX05.DateField.Create('Prüfdatum', System.DateTime.Now))
@@ -758,7 +761,7 @@ class OrderQueryPage(BasePage):
 
         # 创建子表单 "Prüfauefbau" 并添加到 "Dokumentation" 中
         pruefaufbau_form = ASX05.Form.Create('Prüfaufbau')
-        dokumentation_form.TryAddForm(pruefauefbau_form)  # 将子表单添加到 Dokumentation 表单
+        dokumentation_form.TryAddForm(pruefaufbau_form)  # 将子表单添加到 Dokumentation 表单
         pruefaufbau_form.TryAddField(ASX05.TextField.Create('Prüfaufbau', 'frei aufgehängt'))
         pruefaufbau_form.TryAddField(ASX05.TextField.Create('Messaufbau', 'Halbkugel'))
 

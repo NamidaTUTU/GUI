@@ -1,0 +1,1684 @@
+##################################################
+ActionResult
+##################################################
+##Class ActionResult
+ActionResult contains information whether execution of a certain process was successful or not. That information is stored as boolean flag in its property "ActionIsOk". If an action fails, detailed information can be gathered in the property "Message".
+
+#Inheritance: ActionResult
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public class ActionResult
+
+##Properties
+#ActionIsOk
+Boolean flag containing information if process was successful (true) or whether it has failed (false).
+
+#Declaration
+public bool ActionIsOk { get; }
+
+#Property Value
+Type	                                                  Description
+System.Boolean	
+
+#Message
+Detailed information about the reason for failure. Message does not contain any information if process is successful.
+
+#Declaration
+public string Message { get; }
+
+#Property Value
+Type	                                                  Description
+System.String	
+
+##################################################
+BooleanField
+##################################################
+##Class BooleanField
+A BooleanField contains a "DocumentationValue" property. This class provides methods for the creation of a BooleanField, for setting its value as well as a method for cloning a BooleanField object into another instance.
+
+#Inheritance: BooleanField
+#Implements
+IBooleanField
+IField
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public class BooleanField : Field, IBooleanField, IField
+
+##Properties
+#DocumentationValue
+Nullable value of BooleanField
+#Declaration
+public bool? DocumentationValue { get; }
+#Property Value
+Type	                                                   Description
+System.Nullable<System.Boolean>	
+
+##Methods
+#Clone()
+Clones a BooleanField object into another instance
+#Declaration
+public BooleanField Clone()
+#Returns
+Type	                                                   Description
+BooleanField	                                           BooleanField
+
+#Create(String, Nullable<Boolean>)
+Creates a BooleanField
+#Declaration
+public static BooleanField Create(string fieldName, bool? value)
+
+#Parameters
+Type	                                                  Name	                             Description
+System.String	                                          fieldName	                     The name of a BooleanField must not start or end with a blank space. It must be unique within a Form.
+
+
+System.Nullable<System.Boolean>	                          value	                             Nullable value
+
+#Returns
+Type	                                                 Description
+BooleanField	                                         BooleanField
+
+
+#TrySetValue(Nullable<Boolean>)
+Tries setting a value for the DocumentationValue of a BooleanField
+#Declaration
+public ActionResult TrySetValue(bool? newValue)
+
+#Parameters
+Type	                                            Name	                   Description
+System.Nullable<System.Boolean>	                   newValue	                   Nullable boolean value
+
+#Returns
+Type	                      Description
+ActionResult	              ActionResult
+
+#Implements
+IBooleanField
+IField
+
+##################################################
+DateField
+##################################################
+##Class DateField
+A DateField contains a "DocumentationValue" property. This class provides methods for the creation of a DateField, for setting its value as well as a method for cloning a DateField object into another instance.
+
+#Inheritance: DateField
+#Implements
+IDateField
+IField
+
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public class DateField : Field, IDateField, IField
+
+
+##Properties
+#DocumentationValue
+Nullable value of DateField
+
+#Declaration
+public DateTime? DocumentationValue { get; }
+#Property Value
+Type	                                                Description
+System.Nullable<System.DateTime>	
+
+##Methods
+#Clone()
+Clones a DateField object into another instance
+#Declaration
+public DateField Clone()
+#Returns
+Type	                 Description
+DateField	         DateField
+
+#Create(String, Nullable<DateTime>)
+Creates a DateField
+
+#Declaration
+public static DateField Create(string fieldName, DateTime? value)
+#Parameters
+Type	                                   Name	                                         Description
+System.String	                         fieldName	                                 The name of a DateField must not start or end with a blank space. It must be unique within a Form
+
+
+System.Nullable<System.DateTime>	   value	                                 Nullable value
+
+#Returns
+Type	                 Description
+DateField	         DateField
+
+#TrySetValue(Nullable<DateTime>)
+Tries setting a value for the DocumentationValue of a DateField
+
+#Declaration
+public ActionResult TrySetValue(DateTime? newValue)
+#Parameters
+Type	                                  Name	                 Description
+System.Nullable<System.DateTime>	newValue	         Nullable DateTime value
+
+#Returns
+Type	               Description
+ActionResult	       ActionResult
+
+#Implements
+IDateField
+IField
+
+
+##################################################
+Documentation
+##################################################
+#####Class Documentation
+Documentation has a "Name" property and can contain Form and Field objects. It provides methods to manipulate a User Documentation, to create one from scratch and to clone one Documentation object into another instance.
+
+#Inheritance: Documentation
+#Implements
+IDocumentation
+IForm
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public class Documentation : IDocumentation, IForm
+
+##Properties
+#Fields
+Set of Fields
+
+#Declaration
+public IEnumerable<Field> Fields { get; }
+#Property Value
+Type	                                                          Description
+System.Collections.Generic.IEnumerable<Field>	
+#Forms
+Set of Forms
+
+#Declaration
+public IEnumerable<Form> Forms { get; }
+#Property Value
+Type	                                                          Description
+System.Collections.Generic.IEnumerable<Form>	
+#Name
+Name of Documentation
+
+#Declaration
+public string Name { get; }
+#Property Value
+Type	                                                          Description
+System.String	
+
+##Methods
+#AddField(Field)
+Adds a Field
+
+#Declaration
+public void AddField(Field field)
+#Parameters
+Type	                      Name	       Description
+Field	                      field	       User Documentation Field which should be added
+
+
+#AddForm(Form)
+Adds a Form
+
+Declaration
+public void AddForm(Form form)
+
+#Parameters
+Type	Name	Description
+Form	form	User Documentation Form which should be added
+
+#ClearFields()
+Clears all Fields of the specified Documentation
+
+Declaration
+public void ClearFields()
+
+#ClearForms()
+Clears all Forms of the specified Documentation
+
+Declaration
+public void ClearForms()
+
+#Clone()
+Clones a Documentation object into another instance
+
+Declaration
+public Documentation Clone()
+
+Returns
+Type	           Description
+Documentation	   User Documentation
+
+
+#Create(String)
+Creates a new Documentation
+
+Declaration
+public static Documentation Create(string title)
+Parameters
+Type	         Name	  Description
+System.String	title	  Name of the User Documentation; it must not start with an @ sign or start or end with a blank space
+
+
+Returns
+Type	             Description
+Documentation	     User Documentation
+
+
+#RemoveField(String)
+Removes a Field
+
+Declaration
+public void RemoveField(string name)
+Parameters
+Type	        Name	Description
+System.String	name	Name of the Field to remove
+
+
+#RemoveForm(String)
+Removes a Form
+
+Declaration
+public void RemoveForm(string name)
+Parameters
+Type	        Name	Description
+System.String	name	Name of the Form to remove
+
+
+#TryAddField(Field)
+Tries adding a Field
+
+Declaration
+public ActionResult TryAddField(Field field)
+Parameters
+Type	Name	Description
+Field	field	User Documentation Field which should be added
+
+
+Returns
+Type	            Description
+ActionResult	    ActionResult
+
+#TryAddForm(Form)
+Tries adding a Form
+
+Declaration
+public ActionResult TryAddForm(Form form)
+Parameters
+Type	Name	Description
+Form	form	User Documentation Form which should be added
+
+
+Returns
+Type	         Description
+ActionResult	 ActionResult
+
+
+#TryGetBooleanField(String, String)
+Tries getting a BooleanField
+
+Declaration
+public BooleanField TryGetBooleanField(string form, string field)
+Parameters
+Type	        Name	Description
+System.String	form	Name of User Documentation Form containing BooleanField
+System.String	field	Name of BooleanField
+
+
+Returns
+Type	          Description
+BooleanField	  User Documentation BooleanField
+
+
+#TryGetDateField(String, String)
+Tries getting a DateField
+
+Declaration
+public DateField TryGetDateField(string form, string field)
+Parameters
+Type	        Name	Description
+System.String	form	Name of User Documentation Form containing DateField
+System.String	field	Name of DateField
+
+
+Returns
+Type	      Description
+DateField     User Documentation DateField
+
+
+#TryGetForm(String)
+Tries getting a Form
+
+Declaration
+public Form TryGetForm(string form)
+Parameters
+Type	        Name	Description
+System.String	form	Name of User Documentation Form to get
+
+
+Returns
+Type	     Description
+Form	
+
+#TryGetIntegerField(String, String)
+Tries getting an IntegerField
+
+Declaration
+public IntegerField TryGetIntegerField(string form, string field)
+Parameters
+Type	        Name	Description
+System.String	form	Name of User Documentation Form containing IntegerField
+System.String	field	Name of IntegerField
+
+
+Returns
+Type	                               Description
+IntegerField	                       User Documentation IntegerField
+
+#TryGetRealField(String, String)        
+Tries getting a RealField
+
+Declaration
+public RealField TryGetRealField(string form, string field)
+Parameters
+Type	        Name	Description
+System.String	form	Name of User Documentation Form containing RealField
+System.String	field	Name of RealField
+
+
+Returns
+Type	       Description
+RealField      User Documentation RealField	
+
+
+#TryGetTextField(String, String)
+Tries getting a TextField
+
+Declaration
+public TextField TryGetTextField(string form, string field)
+Parameters
+Type	        Name	Description
+System.String	form	Name of User Documentation Form containing TextField
+System.String	field	Name of TextField
+
+
+Returns
+Type	        Description
+TextField	User Documentation TextField
+
+
+#TryRemoveField(String)
+Tries removing a Field
+
+Declaration
+public ActionResult TryRemoveField(string name)
+Parameters
+Type	        Name	Description
+System.String	name	Name of the Field to remove
+
+
+Returns
+Type	         Description
+ActionResult	 ActionResult
+
+
+#TryRemoveForm(String)
+Tries removing a Form
+
+Declaration
+public ActionResult TryRemoveForm(string name)
+Parameters
+Type	        Name	Description
+System.String	name	Name of the Form to remove
+
+
+Returns
+Type	                Description
+ActionResult	        ActionResult
+
+
+#TrySetName(String)
+Tries setting the Name of a Documentation
+
+Declaration
+public ActionResult TrySetName(string name)
+Parameters
+Type	        Name	Description
+System.String	name	String for the name of the Documentation; it must not start with an @ sign or start or end with a blank space
+
+
+Returns
+Type	           Description
+ActionResult	   ActionResult
+
+
+
+#Explicit Interface Implementations#
+
+##IDocumentation.TryGetBooleanField(String, String)
+Declaration
+IBooleanField IDocumentation.TryGetBooleanField(string form, string field)
+
+Parameters
+Type	        Name	Description
+System.String	form	
+System.String	field	
+
+Returns
+Type	          Description
+IBooleanField	
+
+##IDocumentation.TryGetDateField(String, String)
+Declaration
+IDateField IDocumentation.TryGetDateField(string form, string field)
+
+Parameters
+Type	        Name	Description
+System.String	form	
+System.String	field	
+
+Returns
+Type	        Description
+IDateField
+
+##IDocumentation.TryGetForm(String)
+Declaration
+IForm IDocumentation.TryGetForm(string form)
+Parameters
+Type	        Name	Description
+System.String	form	
+
+Returns
+Type	Description
+IForm	
+
+##IDocumentation.TryGetIntegerField(String, String)
+Declaration
+IIntegerField IDocumentation.TryGetIntegerField(string form, string field)
+
+Parameters
+Type	        Name	Description
+System.String	form	
+System.String	field	
+
+Returns
+Type	        Description
+IIntegerField	
+
+##IDocumentation.TryGetRealField(String, String)
+Declaration
+IRealField IDocumentation.TryGetRealField(string form, string field)
+
+Parameters
+Type	        Name	Description
+System.String	form	
+System.String	field	
+
+Returns
+Type	      Description
+IRealField	
+
+##IDocumentation.TryGetTextField(String, String)
+Declaration
+ITextField IDocumentation.TryGetTextField(string form, string field)
+
+Parameters
+Type	        Name	Description
+System.String	form	
+System.String	field	
+
+Returns
+Type	        Description
+ITextField
+
+##IForm.Fields
+Declaration
+IEnumerable<IField> IForm.Fields { get; }
+
+Returns
+Type	                                                  Description
+System.Collections.Generic.IEnumerable<IField>	
+
+##IForm.Forms
+Declaration
+IEnumerable<IForm> IForm.Forms { get; }
+
+Returns
+Type	                                                  Description
+System.Collections.Generic.IEnumerable<IForm>
+
+
+##IForm.Name
+Declaration
+string IForm.Name { get; }
+
+Returns
+Type	                         Description
+System.String	
+
+#Implements
+IDocumentation
+IForm
+	
+#Extension Methods
+DocumentationConverter.ToUserDocumentation(IDocumentation)
+
+##################################################
+Documentation Converter
+##################################################
+
+##Class DocumentationConverter
+Converts Documentations from one into another.
+
+#Inheritance: DocumentationConverter
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public static class DocumentationConverter
+
+##Methods
+#ToUserDocumentation(IDocumentation)
+Converts IDocumentation to Documentation
+
+#Declaration
+public static Documentation ToUserDocumentation(this IDocumentation documentation)
+#Parameters
+Type	            Name	Description
+IDocumentation	documentation	Readonly Documentation
+
+Returns
+Type	                   Description
+Documentation	           User Documentation
+
+
+##################################################
+Documentation Converter
+##################################################
+
+##Class DocumentationConverter
+Converts Documentations from one into another.
+
+#Inheritance: DocumentationConverter
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public static class DocumentationConverter
+
+##Methods
+#ToUserDocumentation(IDocumentation)
+Converts IDocumentation to Documentation
+
+#Declaration
+public static Documentation ToUserDocumentation(this IDocumentation documentation)
+#Parameters
+Type	             Name	Description
+IDocumentation	documentation	Readonly Documentation
+
+
+#Returns
+Type	           Description
+Documentation	   User Documentation
+
+##################################################
+Documentation Reader
+##################################################
+
+##Class DocumentationReader
+This class provides appropriate methods to read different kinds of User Documentation.
+
+#Inheritance: DocumentationReader
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public static class DocumentationReader
+
+##Methods
+#ReadDirectoryDocumentation(String)
+Reads the User Documentation of a directory
+
+Declaration
+public static Documentation ReadDirectoryDocumentation(string folderPath)
+Parameters
+Type	           Name	        Description
+System.String	folderPath	Path of a documented folder
+
+
+Returns
+Type	           Description
+Documentation	   User Documentation
+
+
+Exceptions
+Type	                                Condition
+System.ArgumentNullException	        Folder path is null or empty
+InvalidDocumentationFormatException	Wrong format of User Documentation
+
+#ReadFileDocumentation(String)
+Reads the User Documentation of a file
+
+Declaration
+public static Documentation ReadFileDocumentation(string filePath)
+
+Parameters
+Type	         Name	         Description
+System.String	filePath	 Path of a documented file including file extension
+
+
+Returns
+Type	            Description
+Documentation	    User Documentation
+
+
+Exceptions
+Type	                                  Condition
+System.ArgumentNullException	          File path is null or empty
+InvalidDocumentationFormatException	  Wrong format of User Documentation
+
+##################################################
+Documentation Writer
+##################################################
+
+##Class DocumentationWriter
+
+This class provides appropriate methods to write different kinds of User Documentation.
+
+IMPORTANT
+External and embedded documentation cannot coexist; if embedded documentation exists, it's erased on creating external documentation for that file and vice versa.
+
+#Inheritance: DocumentationWriter
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public static class DocumentationWriter
+
+##Methods
+#WriteDirectoryDocumentation(Documentation, String)
+Writes User Documentation to a directory
+
+Declaration
+public static ActionResult WriteDirectoryDocumentation(Documentation documentation, string folderPath)
+
+Parameters
+Type	            Name	Description
+Documentation	documentation	User Documentation
+System.String	  folderPath	Path of a folder to apply documentation to
+
+
+Returns
+Type	            Description
+ActionResult	    ActionResult
+
+
+#WriteFileDocumentation(Documentation, String, Storage)
+Writes User Documentation to a file
+
+Declaration
+public static ActionResult WriteFileDocumentation(Documentation documentation, string filePath, Storage storage = Storage.PreferEmbedded)
+
+Parameters
+Type	            Name	Description
+Documentation	documentation	User Documentation
+System.String	  filePath	Path of a file including file extension to apply documentation to
+
+
+Storage	storage	
+Definition of the Documentation Storage Type
+
+Returns
+Type	          Description
+ActionResult	  ActionResult
+
+
+##################################################
+Field
+##################################################
+
+##Class Field
+A Field contains the properties "IsEditable", "IsMandatory", "IsVisible", and "Name". It contains a method that allows setting its "Name".
+
+#Inheritance:
+Field
+BooleanField
+DateField
+IntegerField
+RealField
+TextField
+
+#Implements
+IField
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public abstract class Field : IField
+
+##Properties
+#IsEditable
+Boolean value providing information if Field is editable
+
+#Declaration
+public bool IsEditable { get; set; }
+
+#Property Value
+Type	          Description
+System.Boolean	  
+
+#IsMandatory
+Boolean value providing information if Field is mandatory
+
+#Declaration
+public bool IsMandatory { get; set; }
+
+#Property Value
+Type	          Description
+System.Boolean	
+
+#IsVisible
+Boolean value providing information if Field is visible
+
+#Declaration
+public bool IsVisible { get; set; }
+#Property Value
+Type	           Description
+System.Boolean	
+
+#Name
+String for the name of the Field
+
+#Declaration
+public string Name { get; }
+#Property Value
+Type	           Description
+System.String
+
+	
+##Methods
+#TrySetName(String)
+Tries setting the "Name" of a Field
+
+#Declaration
+public ActionResult TrySetName(string name)
+#Parameters
+Type	        Name	Description
+System.String	name	String for the name of the Field; it must not start or end with a blank space; the name of the Field must be unique within the Form or Documentation containing it
+
+
+#Returns
+Type	        Description
+ActionResult	ActionResult
+
+
+#Implements
+IField
+
+
+##################################################
+Form
+##################################################
+
+##Class Form
+Form has a "Name" property and can contain Form and Field objects. It provides methods to manipulate a Form, to create one from scratch and to clone one Form object into another instance.
+
+#Inheritance: Form
+#Implements: IForm
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public class Form : IForm
+
+##Properties
+#Fields
+Set of Fields
+
+#Declaration
+public IEnumerable<Field> Fields { get; }
+#Property Value
+Type	                                              Description
+System.Collections.Generic.IEnumerable<Field>	
+
+#Forms
+Set of Forms
+
+#Declaration
+public IEnumerable<Form> Forms { get; }
+#Property Value
+Type	                                              Description
+System.Collections.Generic.IEnumerable<Form>	
+
+#Name
+String for the name of the Form
+
+#Declaration
+public string Name { get; }
+#Property Value
+Type	                  Description
+System.String	
+
+##Methods
+#AddField(Field)
+Adds a Field
+
+Declaration
+public void AddField(Field field)
+
+Parameters
+Type	Name	Description
+Field	field	User Documentation Field which should be added
+
+#AddForm(Form)
+Adds a Form
+
+Declaration
+public void AddForm(Form form)
+
+Parameters
+Type	Name	Description
+Form	form	User Documentation Form which should be added
+
+#ClearFields()
+Clears all Fields of the specified Form
+
+Declaration
+public void ClearFields()
+
+#ClearForms()
+Clears all Forms of the specified Form
+
+Declaration
+public void ClearForms()
+
+#Clone()
+Clones a Form object into another instance
+
+Declaration
+public Form Clone()
+
+Returns
+Type	Description
+Form	
+
+#Create(String)
+Creates a new Form
+
+Declaration
+public static Form Create(string formName)
+
+Parameters
+Type	          Name	         Description
+System.String	formName	 The name of the Form must be unique within the entire Documentation; it must not start with an @ sign or start or end with a blank space
+
+Returns
+Type	Description
+Form	User Documentation Form
+
+
+#RemoveField(String)
+Removes a Field
+
+Declaration
+public void RemoveField(string name)
+Parameters
+Type	        Name	Description
+System.String	name	Name of the Field to remove
+
+#RemoveForm(String)
+Removes a Form
+
+Declaration
+public void RemoveForm(string name)
+
+Parameters
+Type	        Name	Description
+System.String	name	Name of the Form to remove
+
+
+#TryAddField(Field)
+Tries adding a Field
+
+Declaration
+public ActionResult TryAddField(Field field)
+
+Parameters
+Type	Name	Description
+Field	field	User Documentation Field which should be added
+
+
+Returns
+Type	         Description
+ActionResult	 ActionResult
+
+
+#TryAddForm(Form)
+Tries adding a Form
+
+Declaration
+public ActionResult TryAddForm(Form form)
+
+Parameters
+Type	Name	Description
+Form	form	User Documentation Form which should be added
+
+
+Returns
+Type	         Description
+ActionResult	 ActionResult
+
+#TryRemoveField(String)
+Tries removing a Field
+
+Declaration
+public ActionResult TryRemoveField(string name)
+
+Parameters
+Type	        Name	Description
+System.String	name	Name of the Field to remove
+
+
+Returns
+Type	          Description
+ActionResult	  ActionResult
+
+
+#TryRemoveForm(String)
+Tries removing a Form
+
+Declaration
+public ActionResult TryRemoveForm(string name)
+
+Parameters
+Type	        Name	Description
+System.String	name	Name of the Form to remove
+
+
+Returns
+Type	         Description
+ActionResult	 ActionResult
+
+
+#TrySetName(String)
+Tries setting the Name of a Form
+
+Declaration
+public ActionResult TrySetName(string name)
+
+Parameters
+Type	        Name	Description
+System.String	name	String for the name of the Form; it must not start with an @ sign or start or end with a blank space; the name of the Form must be unique within the entire Documentation
+
+
+Returns
+Type	          Description
+ActionResult	  ActionResult
+
+##Explicit Interface Implementations
+#IForm.Fields
+Declaration
+IEnumerable<IField> IForm.Fields { get; }
+
+Returns
+Type	                                           Description
+System.Collections.Generic.IEnumerable<IField>	
+
+#IForm.Forms
+Declaration
+IEnumerable<IForm> IForm.Forms { get; }
+Returns
+Type	                                           Description
+System.Collections.Generic.IEnumerable<IForm>	
+
+#IForm.Name
+Declaration
+string IForm.Name { get; }
+
+Returns
+Type	            Description
+System.String	
+
+#Implements
+IForm
+
+
+##################################################
+IBooleanField
+##################################################
+
+##Interface IBooleanField
+IBooleanField cannot be edited, but read or converted into BooleanField. It only provides readonly access.
+
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public interface IBooleanField : IField
+
+##Properties
+#DocumentationValue
+Nullable value of BooleanField
+
+#Declaration
+bool? DocumentationValue { get; }
+#Property Value
+Type	                           Description
+System.Nullable<System.Boolean>	
+
+
+##################################################
+IDateField
+##################################################
+
+#Interface IDateField
+IDateField cannot be edited, but read or converted into DateField. It only provides readonly access.
+
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public interface IDateField : IField
+
+##Properties
+#DocumentationValue
+Nullable value of DateField
+
+#Declaration
+DateTime? DocumentationValue { get; }
+#Property Value
+Type	                              Description
+System.Nullable<System.DateTime>
+
+
+##################################################
+IDocumentation
+##################################################	
+
+##Interface IDocumentation
+IDocumentation cannot be edited, but read or converted into Documentation. It only provides readonly access. IDocumentation can contain IForm and IField objects.
+
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public interface IDocumentation : IForm
+
+##Methods
+#TryGetBooleanField(String, String)
+Try getting an IBooleanField in the specified IForm
+
+future release
+This method has no functionality in the current release. It's implemented for potential future enhancements.
+
+Declaration
+IBooleanField TryGetBooleanField(string form, string field)
+
+Parameters
+Type	        Name	Description
+System.String	form	Name of IForm
+System.String	field	Name of IBooleanField
+
+
+Returns
+Type	          Description
+IBooleanField	  IBooleanField
+
+#TryGetDateField(String, String)
+Try getting an IDateField in the specified IForm
+
+future release
+This method has no functionality in the current release. It's implemented for potential future enhancements.
+
+Declaration
+IDateField TryGetDateField(string form, string field)
+
+Parameters
+Type	        Name	Description
+System.String	form	Name of IForm
+System.String	field	Name of IDateField
+
+
+Returns
+Type	      Description
+IDateField    IDateField
+
+#TryGetForm(String)
+Try getting an IForm in this IDocumentation
+
+Declaration
+IForm TryGetForm(string form)
+
+Parameters
+Type	        Name	Description
+System.String	form	Name of IForm
+
+
+Returns
+Type	  Description
+IForm	  IForm
+
+#TryGetTextField(String, String)
+Try getting an ITextField in the specified IForm
+
+Declaration
+ITextField TryGetTextField(string form, string field)
+
+Parameters
+Type	        Name	Description
+System.String	form	Name of IForm
+System.String	field	Name of ITextField
+
+
+Returns
+Type	       Description
+ITextField     ITextField
+
+##Extension Methods
+DocumentationConverter.ToUserDocumentation(IDocumentation)
+
+	
+##################################################
+IField
+##################################################
+
+##Interface IField
+IField cannot be edited, but read or converted into Field. It only provides readonly access.
+
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public interface IField
+
+##Properties
+#Name
+Name of IField
+
+#Declaration
+string Name { get; }
+#Property Value
+Type	        Description
+System.String	
+
+##################################################
+IForm
+##################################################
+
+##Interface IForm
+IForm cannot be edited, but read or converted into Form. It only provides readonly access. IForm can contain further IForm and IField objects.
+
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public interface IForm
+
+##Properties
+#Fields
+Set of IFields
+
+#Declaration
+IEnumerable<IField> Fields { get; }
+
+#Property Value
+Type	                                               Description
+System.Collections.Generic.IEnumerable<IField>	
+
+#Forms
+Set of IForms
+
+#Declaration
+IEnumerable<IForm> Forms { get; }
+
+#Property Value
+Type	                                               Description
+System.Collections.Generic.IEnumerable<IForm>	
+
+#Name
+Name of IForm
+
+#Declaration
+string Name { get; }
+
+#Property Value
+Type	                Description
+System.String	
+
+
+##################################################
+IIntegerField
+##################################################
+
+##Interface IIntegerField
+IIntegerField cannot be edited, but read or converted into IntegerField. It only provides readonly access.
+
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public interface IIntegerField : IField
+
+##Properties
+#DocumentationValue
+Nullable value of IIntegerField
+
+#Declaration
+int? DocumentationValue { get; }
+#Property Value
+Type	                             Description
+System.Nullable<System.Int32>	
+
+
+##################################################
+IntegerField
+##################################################
+
+##Class IntegerField
+An IntegerField contains the properties "DocumentationValue", "Unit", "MinValue" and "MaxValue". This class provides methods for the creation of an IntegerField, for setting its value as well as a method for cloning an IntegerField object into another instance. In addition, there are methods for setting the lower and upper boundary for the "DocumentationValue" property of an IntegerField.
+
+#Inheritance: IntegerField
+#Implements
+IIntegerField
+IField
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public class IntegerField : Field, IIntegerField, IField
+
+##Properties
+#DocumentationValue
+Nullable value of IntegerField
+
+Declaration
+public int? DocumentationValue { get; }
+
+Property Value
+Type	                         Description
+System.Nullable<System.Int32>	
+
+#MaxValue
+Nullable value for the upper boundary of the DocumentationValue
+
+Declaration
+public int? MaxValue { get; }
+
+Property Value
+Type	                          Description
+System.Nullable<System.Int32>	
+
+#MinValue
+Nullable value for the lower boundary of the DocumentationValue
+
+Declaration
+public int? MinValue { get; }
+#Property Value
+Type	                             Description
+System.Nullable<System.Int32>	
+
+#Unit
+String for the Unit of DocumentationValue
+
+Declaration
+public string Unit { get; set; }
+
+Property Value
+Type	              Description
+System.String	
+
+
+##################################################
+IRealField
+##################################################
+
+##Interface IRealField
+IRealField cannot be edited, but read or converted into RealField. It only provides readonly access.
+
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public interface IRealField : IField
+
+##Properties
+#DocumentationValue
+Nullable value of IRealField
+
+#Declaration
+double? DocumentationValue { get; }
+#Property Value
+Type	                           Description
+System.Nullable<System.Double>	
+
+
+##################################################
+ITextField
+##################################################
+
+##Interface ITextField
+ITextField cannot be edited, but read or converted into TextField. It only provides readonly access.
+
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public interface ITextField : IField
+
+##Properties
+#DocumentationValue
+String value of TextField
+
+#Declaration
+string DocumentationValue { get; }
+#Property Value
+Type	           Description
+System.String	
+
+
+##################################################
+RealField
+##################################################
+
+##Class RealField
+A RealField contains the properties "DocumentationValue", "Unit", "MinValue" and "MaxValue". This class provides methods for the creation of a RealField, for setting its value as well as a method for cloning a RealField object into another instance. In addition, there are methods for setting the lower and upper boundary for the "DocumentationValue" property of a RealField.
+
+#Inheritance: RealField
+#Implements
+IRealField
+IField
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public class RealField : Field, IRealField, IField
+
+##Properties
+#DocumentationValue
+Nullable value of RealField
+
+Declaration
+public double? DocumentationValue { get; }
+
+Property Value
+Type	                                   Description
+System.Nullable<System.Double>	
+
+#MaxValue
+Nullable value for the upper boundary of the DocumentationValue
+
+Declaration
+public double? MaxValue { get; }
+
+Property Value
+Type	                                   Description
+System.Nullable<System.Double>	
+
+#MinValue
+Nullable value for the lower boundary of the DocumentationValue
+
+Declaration
+public double? MinValue { get; }
+
+Property Value
+Type	                                  Description
+System.Nullable<System.Double>	
+
+#Unit
+String for the Unit of DocumentationValue
+
+Declaration
+public string Unit { get; set; }
+
+Property Value
+Type	                                  Description
+System.String	
+
+##Methods
+
+#Clone()
+Clones a RealField object into another instance
+
+Declaration
+public RealField Clone()
+
+Returns
+Type	         Description
+RealField	 RealField
+
+
+#Create(String, Nullable<Double>)
+Creates a RealField
+
+Declaration
+public static RealField Create(string fieldName, double? value)
+
+Parameters
+Type	                             Name	         Description
+System.String	                   fieldName	         The name of a RealField must not start or end with a blank space. It must be unique within a Form
+System.Nullable<System.Double>	     value	         Nullable value
+
+
+Returns
+Type	     Description
+RealField    RealField
+
+
+#TrySetMaxValue(Nullable<Double>)
+Tries setting the upper boundary of the DocumentationValue
+
+Declaration
+public ActionResult TrySetMaxValue(double? newMaxValue)
+
+Parameters
+Type	                           Name	                   Description
+System.Nullable<System.Double>	newMaxValue	           Nullable real value
+
+
+Returns
+Type	        Description
+ActionResult	ActionResult
+
+#TrySetMinValue(Nullable<Double>)
+Tries setting the lower boundary of the DocumentationValue
+
+Declaration
+public ActionResult TrySetMinValue(double? newMinValue)
+
+Parameters
+Type	                            Name	Description
+System.Nullable<System.Double>	newMinValue	Nullable real value
+
+
+Returns
+Type	        Description
+ActionResult	ActionResult
+
+
+#TrySetValue(Nullable<Double>)
+Tries setting a value for the DocumentationValue of a RealField
+
+Declaration
+public ActionResult TrySetValue(double? newValue)
+
+Parameters
+Type	                          Name	        Description
+System.Nullable<System.Double>	newValue	Nullable real value
+
+
+Returns
+Type	        Description
+ActionResult	ActionResult
+
+##Implements
+IRealField
+IField
+
+
+##################################################
+TemplateReader
+##################################################
+
+##Class TemplateReader
+This class provides a method to read User Documentation Templates.
+
+#Inheritance: TemplateReader
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public static class TemplateReader
+
+##Methods
+#Read(String)
+Reads the content of a User Documentation Template
+
+#Declaration
+public static Documentation Read(string templatePath)
+
+#Parameters
+Type	            Name	Description
+System.String	templatePath	Path of a User Documentation Template including file extension
+
+
+Returns
+Type	               Description
+Documentation	       User Documentation
+
+
+##################################################
+TemplateWriter
+##################################################
+
+##Class TemplateWriter
+This class provides a method to write User Documentation Templates.
+
+#Inheritance: TemplateWriter
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public static class TemplateWriter
+
+##Methods
+#Write(Documentation, String)
+Writes a User Documentation Template
+
+#Declaration
+public static ActionResult Write(Documentation documentation, string templatePath)
+#Parameters
+Type	            Name	  Description
+Documentation	documentation	  User Documentation
+System.String	templatePath	  Path to write User Documentation Template to (including file extension)
+
+
+#Returns
+Type	          Description
+ActionResult	  ActionResult
+
+
+##################################################
+TextField
+##################################################
+
+##Class TextField
+A TextField contains the properties "DocumentationValue" and "MaxLength". This class provides methods for the creation of a TextField, for setting its value as well as a method for cloning a TextField object into another instance. In addition, there is a method for setting the maximal length for the "DocumentationValue" property of a TextField.
+
+#Inheritance: TextField
+#Implements
+ITextField
+IField
+#Namespace: HEADacoustics.API.Documentation
+#Assembly: HEADacoustics.API.Documentation.dll
+#Syntax
+public class TextField : Field, ITextField, IField
+
+##Properties
+#DocumentationValue
+String value of TextField
+
+#Declaration
+public string DocumentationValue { get; }
+
+#Property Value
+Type	                Description
+System.String	
+
+#MaxLength
+Nullable value for the maximal length of the DocumentationValue
+
+Declaration
+public int? MaxLength { get; }
+
+Property Value
+Type	                                   Description
+System.Nullable<System.Int32>	
+
+
+##Methods
+#Clone()
+Clones a TextField object into another instance
+
+Declaration
+public TextField Clone()
+
+Returns
+Type	         Description
+TextField	 TextField
+
+#Create(String, String)
+Creates a TextField
+
+Declaration
+public static TextField Create(string fieldName, string value)
+
+Parameters
+Type	           Name	          Description
+System.String	fieldName	  The name of a TextField must not start or end with a blank space. It must be unique within a Form
+System.String	  value	          Nullable value
+
+
+Returns
+Type	          Description
+TextField	  TextField
+
+#TrySetMaxLength(Nullable<Int32>)
+Tries setting the maximal length of the DocumentationValue
+
+Declaration
+public ActionResult TrySetMaxLength(int? newMaxLength)
+
+Parameters
+Type	                            Name	Description
+System.Nullable<System.Int32>	newMaxLength	Nullable integer value
+
+
+Returns
+Type	        Description
+ActionResult	ActionResult
+
+#TrySetValue(String)
+Tries setting a value for the DocumentationValue of a TextField
+
+Declaration
+public ActionResult TrySetValue(string newValue)
+
+Parameters
+Type	          Name	        Description
+System.String	newValue	Nullable integer value
+
+
+Returns
+Type	               Description
+ActionResult	       ActionResult
+
+
+##Implements
+ITextField
+IField
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,549 @@
+The Documentation and Metadata API
+
+1.Create User Documentation
+In this example, User Documentation is created from scratch.
+
+
+import clr
+import System
+import sys
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Documentation')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Documentation as ASX05
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+outPath = r'C:\temp\Example'
+inDoc = ASX05.Documentation.Create('Created by API')
+
+textField = ASX05.TextField.Create('Name', 'Meier')
+dateField = ASX05.DateField.Create('Created', System.DateTime.Now)
+inDoc.AddField(textField)
+inDoc.AddField(dateField)
+
+isWritten = ASX05.DocumentationWriter.WriteDirectoryDocumentation(inDoc, outPath)
+
+license_.Dispose()
+
+2.Copy User Documentation
+In this example, the User Documentation of a directory is copied to another directory.
+
+
+import clr
+import sys
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Documentation')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Documentation as ASX05
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+inPath = r'C:\temp\Example'
+outPath = r'C:\temp\Target'
+
+inDoc = ASX05.DocumentationReader.ReadDirectoryDocumentation(inPath)
+
+isWritten = ASX05.DocumentationWriter.WriteDirectoryDocumentation(inDoc, outPath)
+
+license_.Dispose()
+
+3.Read, Modify and Write a Documentation Template
+In this example, a User Documentation Template is read, modified, and written to another Documentation Template.
+
+
+import clr
+import sys
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Documentation')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Documentation as ASX05
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+inPath = r'C:\temp\Car_Documentation_Template.hatx'
+outPath = r'C:\temp\Car_Documentation_Template_Mod.hatx'
+
+inDoc = ASX05.TemplateReader.Read(inPath)
+formCar = inDoc.TryGetForm('Car')
+newForm = ASX05.Form.Create('Transmission')
+isAddedForm = formCar.TryAddForm(newForm)
+
+if isAddedForm.ActionIsOk:
+    newTextField = ASX05.TextField.Create('Gearbox ID', 'C179')
+    isAddedField = newForm.TryAddField(newTextField)
+    newTextField.IsEditable = True
+
+formEngine = inDoc.TryGetForm('Engine')
+fieldDisplacement = inDoc.TryGetRealField(formEngine.Name, 'Displacement')
+fieldDisplacement.TrySetName('Swept Volume')
+fieldDisplacement.DocumentationValue = 1.7
+
+isWritten = ASX05.TemplateWriter.Write(inDoc, outPath)
+
+license_.Dispose()
+
+4.Assign Documentation Template
+In this example, a Documentation Template is read. The resulting User Documentation is modified and assigned to an HDF file.
+
+
+import clr
+import sys
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Documentation')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Documentation as ASX05
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+inPath = r'C:\temp\Car_Documentation_Template.hatx'
+outPath = r'C:\temp\assignedUserDocu.hdf'
+
+inDoc = ASX05.TemplateReader.Read(inPath)
+formTest = inDoc.TryGetForm('Test')
+fieldStatus = inDoc.TryGetTextField(formTest.Name, 'Status')
+fieldStatus.TrySetValue('done')
+
+newField = ASX05.TextField.Create('Operator', 'Schmitz')
+formTest.TryAddField(newField)
+
+isWritten = ASX05.DocumentationWriter.WriteFileDocumentation(inDoc, outPath, ASX05.Storage.PreferEmbedded)
+
+license_.Dispose()
+
+
+5.Convert Legacy UDI Documentation
+In this example, User-Define Information (UDI) is converted to User Documentation.
+
+import clr
+import sys
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Documentation')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Documentation as ASX05
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+inPath = r'C:\temp\originalLegacyUdiDocu.hdf'
+outPath = r'C:\temp\convertedToUserDocu.hdf'
+
+readonlyDocumentation = ASX05.LegacyUdiReader.ReadUdi(inPath)
+documentation = ASX05.DocumentationConverter.ToUserDocumentation(readonlyDocumentation)
+
+isWritten = ASX05.DocumentationWriter.WriteFileDocumentation(documentation, outPath, ASX05.Storage.PreferEmbedded)
+
+license_.Dispose()
+
+
+6.Search by Attribute and Modify its Value
+In this example, the User Documentation of all HDF files in a directory is read and searched for a certain attribute. If this attribute exists and is set to a certain value, its value is modified appropriately.
+
+
+import clr
+import System
+import sys
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Documentation')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Documentation as ASX05
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+pathDir = r'C:\temp\Data'
+hdfFiles = System.IO.Directory.GetFiles(pathDir, '*.hdf')
+formName = 'Owner'
+fieldName = 'Name'
+oldValue = 'Meier'
+newValue = 'Meyer'
+
+for hdfFile in hdfFiles:
+    inDoc = ASX05.DocumentationReader.ReadFileDocumentation(hdfFile)
+    field = inDoc.TryGetTextField(formName, fieldName)
+
+    if field != None and field.DocumentationValue == oldValue:
+        field.DocumentationValue = newValue
+        isWritten = ASX05.DocumentationWriter.WriteFileDocumentation(inDoc, hdfFile, ASX05.Storage.Embedded)
+    else:
+        print(oldValue, 'is not present in documentation of', hdfFile, 'or field is null')
+
+license_.Dispose()
+
+
+7.Remove Form and Field
+In this example, the first User Documentation Form and the first User Documentation Field of the Documentation Template are removed.
+
+import clr
+import sys
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Documentation')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Documentation as ASX05
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+inPath = r'C:\temp\Car_Documentation_Template.hatx'
+outPath = r'C:\temp\Car_Documentation_Template_Mod.hatx'
+
+inDoc = ASX05.TemplateReader.Read(inPath)
+
+inDoc.RemoveForm('Engine')
+inDoc.RemoveField('Manufacturer')
+
+isWritten = ASX05.TemplateWriter.Write(inDoc, outPath)
+
+license_.Dispose()
+
+
+8.Clear Forms and Fields
+import clr
+import sys
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Documentation')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Documentation as ASX05
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+inPath = r'C:\temp\Car_Documentation_Template.hatx'
+outPath = r'C:\temp\Car_Documentation_Template_Mod.hatx'
+
+inDoc = ASX05.TemplateReader.Read(inPath)
+
+inDoc.ClearForms()
+inDoc.ClearFields()
+
+isWritten = ASX05.TemplateWriter.Write(inDoc, outPath)
+
+license_.Dispose()
+
+
+9.Clone Documentation
+In this example, User Documentation is cloned.
+
+import clr
+import sys
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Documentation')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Documentation as ASX05
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+docOne = ASX05.Documentation.Create('Documentation One')
+formOne = ASX05.Form.Create('Form One')
+fieldOne = ASX05.TextField.Create('Field One', None)
+formOne.AddField(fieldOne)
+docOne.AddForm(formOne)
+
+docTwo = docOne.Clone()
+formTwo = docTwo.TryGetForm(formOne.Name)
+fieldTwo = docTwo.TryGetTextField(formOne.Name, fieldOne.Name)
+
+refCheckDoc = docTwo is docOne
+refCheckForm = formTwo is formOne
+refCheckField = fieldTwo is fieldOne
+print(refCheckDoc)
+print(refCheckForm)
+print(refCheckField)
+
+license_.Dispose()
+
+
+###########################################################################
+Remote Library
+
+1.Integrating the Remote Library
+.NET Framework 4.8
+To integrate the remote library in your project, add an assembly reference to the file HEADacoustics.API.Remote.dll of the ASX installation folder. To connect to an ArtemiSuite or Calculator instance, additional dependencies must be provided that are not automatically resolved.
+
+Any application project must include a NuGet reference to
+
+System.Runtime.CompilerServices.Unsafe (>=6.0.0)
+However, for more complex applications with various dependencies, we recommend to include the following additional references to avoid version conflicts and automatically provide the required binding redirects for the executable:
+
+System.Buffers (>=4.5.1)
+System.Memory (>=4.5.5)
+System.Numerics.Vectors (>=4.5.0)
+Python and Matlab
+In order to use ASX 02 "Data Processing and Representation API" within Python and MATLAB, please follow the steps described in section Integration of HEADacoustics APIs.
+
+Library documentation and code snippets
+After you have successfully integrated the Remote library, read on how to get started with an instance of the remote controller or directly jump to the examples, for instance the calculation of a Pool Project.
+
+2.Getting started with the Remote library
+In order to use the Remote library, a license for ASX 02 is required. The procedure of checking out licenses from your dongle is explained in the License section.
+
+The ArtemiSuiteRemote class gives access to the application and the calculator of an ArtemiS SUITE installation. Initially, you create an instance of the ArtemiSuiteRemote class in your code using different entry points to control
+
+the latest installed compatible version,
+a specified executable or
+a desired version from a list of all installed compatible versions.
+To maintain compatibility, we avoid modifications across versions of the Remote library and ArtemiS SUITE applications as far as possible. Therefore, your scripts and applications generally remain compatible with newer ArtemiSUITE installations and it is not necessary to re-build your code for every new release. However, for technical reasons, we only guarantee full compatibility with the current and the next release (see Compatibility and Upcoming Breaking Changes).
+
+Latest installed version
+You can use the function ForLatestApplication(Boolean) to create an instance of ArtemiSuiteRemote that controls the latest installed application version. Optionally, you can specify that you want to consider the latest non-release version as well, i.e., an alpha or beta testing version.
+
+Specified executable
+You can use the function ForExecutable(String) to create an instance of ArtemiSuiteRemote that controls the application specified by the executable path. The path either refers to the ArtemiS SUITE application (ArtemiSuite.exe) or the ArtemiS SUITE calculator (ArtemiSproc.exe).
+
+List of all compatible installed versions
+The function ForAllCompatibleApplications(Boolean) returns a complete list of ArtemiSuiteRemote instances referring to all installed compatible ArtemiS SUITE applications found on the machine. Optionally, you can specify if you want to include non-release versions as well, i.e., alpha or beta testing versions. Consider the property FriendlyName to select the desired version from the list.
+
+
+3.The Remote Application
+The ArtemiSuiteApplication is accessible from the ArtemiSuiteRemote.
+
+Startup
+The ArtemiSuiteApplication can be started either without additional parameters or by adding command line arguments. In addition, the availability of the underlying executable can be determined:
+
+Functionality	Access by Application
+Start the executable	Start()
+Start the executable with command line arguments	Start(String)
+Check if executable is started and listening	IsAvailable
+Services of the Application
+The following services are available for the ArtemiSuiteApplication:
+
+Service	Usage	Access by Application
+Info Service	Information about the targeted executable	GetInfoService()
+Automation Service	Creation and modification of Automation Projects	GetAutomationProjectService()
+Data Viewer Service	Selection of open Data Viewers	GetDataViewerService()
+Pool Project Service	Creation and modification of Pool Projects	GetPoolProjectService()
+Reporting Service	Creation and modification of Reports	GetReportingService()
+Standardized Test Service	Creation and modification of Standardized Test Projects	GetStandardizedTestProjectService()
+Recent Recordings Service	Addition and removal of files to/from the Recent Recordings	GetRecentRecordingsService()
+Processing Service	Start and stop of processing jobs, e.g., signal processing, in a batch.	GetProcessingService()
+Main Window Service	Control of the position and state of the application window	GetMainWindowService()
+Documents Service	Selection, loading, and closing of documents	GetDocumentExportService()
+Document Export Service	Export of documents	GetDocumentsService()
+Events Service	Logging of messages in the Event Viewer	GetEventsService()
+Mark Analyzer Service	Creation and modification of Mark Analyzers	GetMarkAnalyzerService()
+
+
+##########################################################################################################################
+Recorder Remote
+
+1.Connect a Frontend
+
+In this example, a SQuadriga III frontend is connected.
+import clr
+import sys
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Remote')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Remote as ASX02
+from HEADacoustics.API.Remote import Recorder as ASX04
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_04_DataAcquisitionAPI])
+
+remoteClient = ASX02.ArtemiSuiteRemote.ForLatestApplication(True)
+if not remoteClient.Application.IsAvailable:
+    artemisSuiteClient = remoteClient.Application.Start('/nolic').Wait()
+
+recorder = remoteClient.Application.Recorder
+
+availFrontEnds = recorder.GetControlService().GetAvailableFrontends()
+device = None
+for availFrontEnd in availFrontEnds:
+    print(f'Device with nickname "{availFrontEnd.Name}" is available.')
+    if availFrontEnd.DeviceType == ASX04.DeviceType.Squadriga3:
+        device = availFrontEnd
+
+assert device
+
+isConnected = recorder.GetControlService().ConnectFrontend(device)
+print(isConnected)
+
+license_.Dispose()
+
+2.Start and Stop a Recording
+As first example, the source code of a simple application to remotely start the latest version of ArtemiS SUITE and start and stop a recording is shown below:
+
+import clr
+import sys
+import time
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Remote')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Remote as ASX02
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_04_DataAcquisitionAPI])
+
+remoteClient = ASX02.ArtemiSuiteRemote.ForLatestApplication(True)
+if not remoteClient.Application.IsAvailable:
+    artemisSuiteClient = remoteClient.Application.Start('/nolic').Wait()
+
+recorder = remoteClient.Application.Recorder
+
+recorder.GetControlService().SetFileNamePattern('My_first_Record_01.hdf')
+recorder.GetControlService().StartRecord()
+
+time.sleep(3)
+
+recorder.GetControlService().StopRecord()
+
+license_.Dispose()
+
+
+3.Set Triggers
+As second example, the source code of a simple application to remotely start the latest version of ArtemiS SUITE, set a start trigger and a stop trigger, and change start trigger conditions after finishing the first measurement is shown below:
+
+import clr
+import sys
+import time
+
+sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+clr.AddReference('HEADacoustics.API.Remote')
+clr.AddReference('HEADacoustics.API.License')
+
+import HEADacoustics.API.Remote as ASX02
+from HEADacoustics.API.Remote import Recorder as ASX04
+from HEADacoustics.API.License import License, ProductCode
+
+license_ = License.Create([ProductCode.ASX_04_DataAcquisitionAPI])
+
+remoteClient = ASX02.ArtemiSuiteRemote.ForLatestApplication(True)
+if not remoteClient.Application.IsAvailable:
+    artemisSuiteClient = remoteClient.Application.Start('/nolic').Wait()
+
+recorder = remoteClient.Application.Recorder
+
+recorder.GetTriggerService().SetStartSignalTrigger(0, ASX04.SlopeType.Rising, 'axis1', 1.0)
+recorder.GetControlService().SetFileNamePattern('Rising_Slope_Axis1_01.hdf')
+recorder.GetTriggerService().SetStopDurationTrigger(0, 10)
+recorder.GetControlService().StartRecord()
+
+while not recorder.GetControlService().GetIsRecordingEnabled():
+    time.sleep(1)
+
+recorder.GetTriggerService().SetStartSignalTrigger(0, ASX04.SlopeType.Falling, 'axis1', 4.0)
+recorder.GetControlService().SetFileNamePattern('Falling_Slope_Axis1_01.hdf')
+recorder.GetControlService().StartRecord()
+
+license_.Dispose()
+
+##############################################################################################
+Interface IConfiguration
+
+Methods
+LoadAll(String)
+Loads complete Recorder configuration file (*.hrcx) if call comes from ArtemiSuiteApplication If it comes from ASXRemote, there will be all parts loaded but FlowControl and Tasklist.
+
+Declaration
+void LoadAll(string filePath)
+Parameters
+Type	Name	Description
+System.String	filePath	
+Path from which the file should be loaded.
+
+LoadExcitation(String)
+Just loads excitation from Recorder configuration file (*.hrcx)
+
+Declaration
+void LoadExcitation(string filePath)
+Parameters
+Type	Name	Description
+System.String	filePath	
+Path from which the file should be loaded.
+
+LoadFlowControl(String)
+Just loads Flow Control from Recorder configuration file (*.hrcx) Not supported by ASXRemote and its StandAloneRecorder - throws an @System.Runtime.NotImplementedException if used from this point.
+
+Declaration
+void LoadFlowControl(string filePath)
+Parameters
+Type	Name	Description
+System.String	filePath	
+Path from which the file should be loaded.
+
+Exceptions
+Type	Condition
+System.NotImplementedException	
+Flow Control is not supported by StandAloneRecorder
+
+LoadFrontendAndSensors(String)
+Just loads frondend and sensors from Recorder configuration file (*.hrcx)
+
+Declaration
+void LoadFrontendAndSensors(string filePath)
+Parameters
+Type	Name	Description
+System.String	filePath	
+Path from which the file should be loaded.
+
+LoadOnlineAnalysis(String)
+Just loads online analysis from Recorder configuration file (*.hrcx)
+
+Declaration
+void LoadOnlineAnalysis(string filePath)
+Parameters
+Type	Name	Description
+System.String	filePath	
+Path from which the file should be loaded.
+
+LoadTaskList(String)
+Just loads task list from Recorder configuration file (*.hrcx) Not supported by ASXRemote and its StandAloneRecorder - throws an @System.Runtime.NotImplementedException if used from this point.
+
+Declaration
+void LoadTaskList(string filePath)
+Parameters
+Type	Name	Description
+System.String	filePath	
+Path from which the file should be loaded.
+
+Exceptions
+Type	Condition
+System.NotImplementedException	
+Flow Control is not supported by StandAloneRecorder
+
+LoadTrigger(String)
+Just loads trigger from Recorder configuration file (*.hrcx)
+
+Declaration
+void LoadTrigger(string filePath)
+Parameters
+Type	Name	Description
+System.String	filePath	
+Path from which the file should be loaded.
+
+Save(String)
+Saves Recorder configuration file (*.hrcx)
+
+Declaration
+void Save(string filePath)
+Parameters
+Type	Name	Description
+System.String	filePath	
+Path where the file should be saved.
