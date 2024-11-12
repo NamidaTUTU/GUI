@@ -746,7 +746,7 @@ class OrderQueryPage(BasePage):
         dokumentation_form.TryAddField(ASX05.TextField.Create('Typ-Kurzbezeichnung', 'PDE'))
         dokumentation_form.TryAddField(ASX05.TextField.Create('Sachnummer (SNR)', '0392025000'))
         date_str = '2014-12-13'
-        fertigungsdatum = datetime.strptime(date_str, '%Y-%m-%d').date()
+        fertigungsdatum = System.DateTime(date_str, '%Y-%m-%d')
         dokumentation_form.TryAddField(ASX05.DateField.Create('Fertigungsdatum Pumpe', fertigungsdatum))
 
         dokumentation_form.TryAddField(ASX05.TextField.Create('Prüfung', 'Null-Serie'))
