@@ -745,8 +745,9 @@ class OrderQueryPage(BasePage):
         dokumentation_form.TryAddField(ASX05.TextField.Create('Kunde', 'Renault'))
         dokumentation_form.TryAddField(ASX05.TextField.Create('Typ-Kurzbezeichnung', 'PDE'))
         dokumentation_form.TryAddField(ASX05.TextField.Create('Sachnummer (SNR)', '0392025000'))
-        date_str = '2014-12-13'
-        fertigungsdatum = System.DateTime(date_str, '%Y-%m-%d')
+        # date_str = '2014-12-13'
+        # fertigungsdatum = System.DateTime(date_str, '%Y-%m-%d')
+        fertigungsdatum = System.DateTime.Now
         dokumentation_form.TryAddField(ASX05.DateField.Create('Fertigungsdatum Pumpe', fertigungsdatum))
 
         dokumentation_form.TryAddField(ASX05.TextField.Create('Prüfung', 'Null-Serie'))
