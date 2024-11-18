@@ -77,6 +77,11 @@ class OrderQueryPage(BasePage):
         # 3.	Luftschall-Summe-Endfrequenz==‘Frequenzband Max AIR‘
         self.test_typs = ["A", "Q", "Z", "Null-Serie", "Claim（TKU）", "Sonder",
                           "BlockForce"]
+        # query 字典
+        self.query_mapping = {
+            "Null-Serie": "0",
+            "Sonder": "s",
+        }
         self.column_mapping = {
             "Type of Measurment": "Type of Measurement",
             "Motorsachnummer": "Sachnummer",
@@ -125,7 +130,7 @@ class OrderQueryPage(BasePage):
         self.display_columns = ["Prüfnummer", "Sachnummer", "Fertigungsdatum", "Type of Measurement",
                                 "Musternummer", "PV-Nummer"]
         # 展示页的数据
-        self.items_per_page = 5  # 每页显示 50 条
+        self.items_per_page = 10  # 每页显示 10 条
         self.current_page = 0
         self.total_pages = 0
         # 内部frame
@@ -605,6 +610,7 @@ class OrderQueryPage(BasePage):
         # 获取输入内容
         sachnummer_value = self.sachnummer_entry.get()  # 获取 Motor Serial Number
         test_typ = self.test_typ_entry.get()
+        test_typ = self.query_mapping.get(test_typ, test_typ)
 
         # 如果两个输入框都有值，则使用 pandas 筛选
         if sachnummer_value and test_typ:
@@ -789,7 +795,8 @@ class OrderQueryPage(BasePage):
         toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Terz-Endfrequenz', 16000.0))
 
         # 保存文档到指定路径
-        is_written = ASX05.DocumentationWriter.WriteDirectoryDocumentation(inDoc, outPath)
+        # is_written = ASX05.DocumentationWriter.WriteDirectoryDocumentation(inDoc, outPath)
+        is_written = ASX05.DocumentationWriter.Write(inDoc, outPath)
         print("isWritten:", is_written)
 
         # 释放许可证
