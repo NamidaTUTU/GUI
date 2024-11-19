@@ -7,6 +7,7 @@ import pandas as pd
 import chardet
 from tkinter import Scrollbar, messagebox, filedialog
 from base_page import BasePage
+import platform
 
 
 class OrderQueryPage(BasePage):
@@ -154,7 +155,11 @@ class OrderQueryPage(BasePage):
         # 输入框和下拉框
         sachnummer_label = ttk.Label(self.inner_frame, text="Sachnummer:", font=self.font)
         sachnummer_label.grid(row=0, column=0, padx=10, pady=10, sticky=ttk.E)
-        self.sachnummer_entry = ttk.Entry(self.inner_frame, font=self.font, width=29)
+        if platform.system() == "Windows":
+            width = 27
+        else:
+            width = 29
+        self.sachnummer_entry = ttk.Entry(self.inner_frame, font=self.font, width=width)
         self.sachnummer_entry.grid(row=0, column=1, padx=10, pady=10, sticky=ttk.W)
 
         test_typ_label = ttk.Label(self.inner_frame, text="Type of Measurement:", font=self.font)
@@ -215,7 +220,16 @@ class OrderQueryPage(BasePage):
         # 设置列标题
         for col in self.display_columns:
             self.tree.heading(col, text=col)
-            self.tree.column(col, anchor="center")
+            if platform.system() == "Windows":  # 系统兼容
+                if col == "prüfnummer":
+                    width = 210
+                elif col == "Type of Measurement":
+                    width = 272
+                else:
+                    width = 242
+                self.tree.column(col, anchor="center", width=width)
+            else:
+                self.tree.column(col, anchor="center")
         #
         self.tree.grid(row=0, column=0, sticky=ttk.NSEW)
 
