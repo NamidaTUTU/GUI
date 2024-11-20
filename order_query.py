@@ -143,6 +143,10 @@ class OrderQueryPage(BasePage):
         #
         self.font = ("Arial", 12)
         self.title_font = ('Arial', 14, 'bold')
+        #
+        self.pump_documentation_path = r'C:\temp\pump_documentation.hatx'
+        self.pump_template_path = r'C:\temp\pump_template.hatx'
+
 
     def draw(self):
         self.create_order_query_page()
@@ -387,6 +391,7 @@ class OrderQueryPage(BasePage):
                     if section == "Dokumentation" and (label == "Prüfdatum" or label == "Prüfungsdatum"):
                         current_time = datetime.now().strftime('%Y-%m-%d')
                         entry.insert(0, current_time)
+                        data_dict[label] = current_time
                     elif section == "Dokumentation" and label == "Fertigungsdatum":
                         value = data_dict.get(label, "")
                         date_str = self.parse_date(value)
@@ -394,6 +399,8 @@ class OrderQueryPage(BasePage):
                     elif section == "Prüfling" and label == "Prüfling-Nr":
                         value = self.get_prufling_nr(data_dict)
                         entry.insert(0, value)
+                        data_dict['Prüfling-Nr'] = value
+                        data_dict['Prüfling-NR.'] = value
                     else:
                         value = data_dict.get(label, "")
                         unit = self.unit_mapping.get(label, "")
@@ -407,7 +414,7 @@ class OrderQueryPage(BasePage):
 
         # 增加按钮, 按钮布局在 sections 的后面
         generate_user_doc_button = ttk.Button(edit_window, text="Generate UserDoc", width=20,
-                                              command=self.export_hatx_file)
+                                              command=lambda: self.export_hatx_file(data_dict))
         generate_user_doc_button['padding'] = (0, 10)  # 设置内边距来增加button高度
         generate_user_doc_button.grid(row=len(sections) + 1, column=0, padx=0, pady=20)
 
@@ -734,90 +741,94 @@ class OrderQueryPage(BasePage):
                 messagebox.showerror("Error",
                                      f"An error occurred while exporting the file:\n{e}")
 
-    def export_hatx_file(self):
-        import clr
-        import System
-        import sys
-        from datetime import datetime
+    def export_hatx_file(self, data_dict):
+        print(data_dict)
+        self.create_pump_documentation(data_dict)
+        self.create_pump_template(data_dict)
+        messagebox.showinfo("Success", f"File exported successfully! {self.pump_template_path}")
 
-        # 加载必要的程序集
-        sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
-        clr.AddReference('HEADacoustics.API.Documentation')
-        clr.AddReference('HEADacoustics.API.License')
-
-        import HEADacoustics.API.Documentation as ASX05
-        from HEADacoustics.API.License import License, ProductCode
-
-        # 初始化许可证
-        license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
-
-        # 创建新的文档
-        inDoc = ASX05.Documentation.Create('Pumpe_UserDocumentation')
-        # 定义文件路径
-        outPath = r'C:\temp\test_pumpe.hatx'
-
-        # 创建主表单 "Dokumentation"
-        dokumentation_form = ASX05.Form.Create('Dokumentation')
-        inDoc.TryAddForm(dokumentation_form)
-
-        # 在 "Dokumentation" 表单中添加字段
-        dokumentation_form.TryAddField(ASX05.TextField.Create('Kunde', 'Renault'))
-        dokumentation_form.TryAddField(ASX05.TextField.Create('Typ-Kurzbezeichnung', 'PDE'))
-        dokumentation_form.TryAddField(ASX05.TextField.Create('Sachnummer (SNR)', '0392025000'))
-        # date_str = '2014-12-13'
-        # fertigungsdatum = System.DateTime(date_str, '%Y-%m-%d')
-        fertigungsdatum = System.DateTime.Now
-        dokumentation_form.TryAddField(ASX05.DateField.Create('Fertigungsdatum Pumpe', fertigungsdatum))
-
-        dokumentation_form.TryAddField(ASX05.TextField.Create('Prüfung', 'Null-Serie'))
-        dokumentation_form.TryAddField(ASX05.TextField.Create('Prüfer', 'Baessler Andreas'))
-        dokumentation_form.TryAddField(ASX05.DateField.Create('Prüfdatum', System.DateTime.Now))
-
-        # 创建子表单 "Prüfling" 并添加到 "Dokumentation" 中
-        pruefling_form = ASX05.Form.Create('Prüfling')
-        dokumentation_form.TryAddForm(pruefling_form)  # 将子表单添加到 Dokumentation 表单
-        pruefling_form.TryAddField(ASX05.TextField.Create('Prüfling-Nr.',
-                                                          '240620_Nr06_W711Bue_RUN01_M01这里是错的'))  # Prüfling-Nr.组成：Sachnummer (SNR)后六位_Fertigungsdatum Pumpe_W318_选择的测试类型(A,Q,S,0)中的一个_Arbeitspunkt(比如AP1)_Teil_NR.（比如N01）
-
-        # 创建子表单 "Prüfauefbau" 并添加到 "Dokumentation" 中
-        pruefaufbau_form = ASX05.Form.Create('Prüfaufbau')
-        dokumentation_form.TryAddForm(pruefaufbau_form)  # 将子表单添加到 Dokumentation 表单
-        pruefaufbau_form.TryAddField(ASX05.TextField.Create('Prüfaufbau', 'frei aufgehängt'))
-        pruefaufbau_form.TryAddField(ASX05.TextField.Create('Messaufbau', 'Halbkugel'))
-
-        # 创建子表单 "Prüfvorgaben" 并添加到 "Dokumentation" 中
-        pruefvorgaben_form = ASX05.Form.Create('Prüfvorgaben')
-        dokumentation_form.TryAddForm(pruefvorgaben_form)  # 将子表单添加到 Dokumentation 表单
-        pruefvorgaben_form.TryAddField(ASX05.TextField.Create('Prüfvorschrift', '0 140 Y00 2BR'))
-        pruefvorgaben_form.TryAddField(ASX05.TextField.Create('Fördermedium', 'Tyfocor L'))
-        pruefvorgaben_form.TryAddField(ASX05.RealField.Create('Prüf-Spannung', 12.0))
-        pruefvorgaben_form.TryAddField(ASX05.RealField.Create('Testdauer', 20.0))
-        pruefvorgaben_form.TryAddField(ASX05.TextField.Create('Prüf-Art', 'Luft + Körperschall'))
-        pruefvorgaben_form.TryAddField(ASX05.RealField.Create('Luftschall - Meßabstand', 30.0))
-        pruefvorgaben_form.TryAddField(ASX05.RealField.Create('umgerechnet auf', 50.0))
-        pruefvorgaben_form.TryAddField(ASX05.RealField.Create('Förderdruck / Differenzdruck', 0.0))
-        pruefvorgaben_form.TryAddField(ASX05.RealField.Create('Durchfluß', 972.0))
-
-        # 创建子表单 "Toleranzprüfung" 并添加到 "Dokumentation" 中
-        toleranzpruefung_form = ASX05.Form.Create('Toleranzprüfung')
-        dokumentation_form.TryAddForm(toleranzpruefung_form)  # 将子表单添加到 Dokumentation 表单
-        toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Summengrenzwert', 45.0))
-        toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Summe-Startfrequenz', 20.0))
-        toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Summe-Endfrequenz', 20000.0))
-        toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Terzgrenzwert', 30.0))
-        toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Terz-Startfrequenz', 100.0))
-        toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Terz-Endfrequenz', 16000.0))
-
-        # 保存文档到指定路径
-        # is_written = ASX05.DocumentationWriter.WriteDirectoryDocumentation(inDoc, outPath)
-        is_written = ASX05.DocumentationWriter.Write(inDoc, outPath)
-        print("isWritten:", is_written)
-
-        # 释放许可证
-        license_.Dispose()
-
-        print(f"数据已成功写入{outPath}")
-        messagebox.showinfo("Success", f"File exported successfully! {outPath}")
+        # import clr
+        # import System
+        # import sys
+        #
+        # # 加载必要的程序集
+        # sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+        # clr.AddReference('HEADacoustics.API.Documentation')
+        # clr.AddReference('HEADacoustics.API.License')
+        #
+        # import HEADacoustics.API.Documentation as ASX05
+        # from HEADacoustics.API.License import License, ProductCode
+        #
+        # # 初始化许可证
+        # license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+        #
+        # # 创建新的文档
+        # in_doc = ASX05.Documentation.Create('Pumpe_UserDocumentation')
+        # # 定义文件路径
+        # out_path = r'C:\temp\test_pumpe.hatx'
+        #
+        # # 创建主表单 "Dokumentation"
+        # dokumentation_form = ASX05.Form.Create('Dokumentation')
+        # in_doc.TryAddForm(dokumentation_form)
+        #
+        # # 在 "Dokumentation" 表单中添加字段
+        # dokumentation_form.TryAddField(ASX05.TextField.Create('Kunde', 'Renault'))
+        # dokumentation_form.TryAddField(ASX05.TextField.Create('Typ-Kurzbezeichnung', 'PDE'))
+        # dokumentation_form.TryAddField(ASX05.TextField.Create('Sachnummer (SNR)', '0392025000'))
+        # # date_str = '2014-12-13'
+        # # fertigungsdatum = System.DateTime(date_str, '%Y-%m-%d')
+        # fertigungsdatum = System.DateTime.Now
+        # dokumentation_form.TryAddField(ASX05.DateField.Create('Fertigungsdatum Pumpe', fertigungsdatum))
+        #
+        # dokumentation_form.TryAddField(ASX05.TextField.Create('Prüfung', 'Null-Serie'))
+        # dokumentation_form.TryAddField(ASX05.TextField.Create('Prüfer', 'Baessler Andreas'))
+        # dokumentation_form.TryAddField(ASX05.DateField.Create('Prüfdatum', System.DateTime.Now))
+        #
+        # # 创建子表单 "Prüfling" 并添加到 "Dokumentation" 中
+        # pruefling_form = ASX05.Form.Create('Prüfling')
+        # dokumentation_form.TryAddForm(pruefling_form)  # 将子表单添加到 Dokumentation 表单
+        # pruefling_form.TryAddField(ASX05.TextField.Create('Prüfling-Nr.',
+        #                                                   '240620_Nr06_W711Bue_RUN01_M01这里是错的'))  # Prüfling-Nr.组成：Sachnummer (SNR)后六位_Fertigungsdatum Pumpe_W318_选择的测试类型(A,Q,S,0)中的一个_Arbeitspunkt(比如AP1)_Teil_NR.（比如N01）
+        #
+        # # 创建子表单 "Prüfauefbau" 并添加到 "Dokumentation" 中
+        # pruefaufbau_form = ASX05.Form.Create('Prüfaufbau')
+        # dokumentation_form.TryAddForm(pruefaufbau_form)  # 将子表单添加到 Dokumentation 表单
+        # pruefaufbau_form.TryAddField(ASX05.TextField.Create('Prüfaufbau', 'frei aufgehängt'))
+        # pruefaufbau_form.TryAddField(ASX05.TextField.Create('Messaufbau', 'Halbkugel'))
+        #
+        # # 创建子表单 "Prüfvorgaben" 并添加到 "Dokumentation" 中
+        # pruefvorgaben_form = ASX05.Form.Create('Prüfvorgaben')
+        # dokumentation_form.TryAddForm(pruefvorgaben_form)  # 将子表单添加到 Dokumentation 表单
+        # pruefvorgaben_form.TryAddField(ASX05.TextField.Create('Prüfvorschrift', '0 140 Y00 2BR'))
+        # pruefvorgaben_form.TryAddField(ASX05.TextField.Create('Fördermedium', 'Tyfocor L'))
+        # pruefvorgaben_form.TryAddField(ASX05.RealField.Create('Prüf-Spannung', 12.0))
+        # pruefvorgaben_form.TryAddField(ASX05.RealField.Create('Testdauer', 20.0))
+        # pruefvorgaben_form.TryAddField(ASX05.TextField.Create('Prüf-Art', 'Luft + Körperschall'))
+        # pruefvorgaben_form.TryAddField(ASX05.RealField.Create('Luftschall - Meßabstand', 30.0))
+        # pruefvorgaben_form.TryAddField(ASX05.RealField.Create('umgerechnet auf', 50.0))
+        # pruefvorgaben_form.TryAddField(ASX05.RealField.Create('Förderdruck / Differenzdruck', 0.0))
+        # pruefvorgaben_form.TryAddField(ASX05.RealField.Create('Durchfluß', 972.0))
+        #
+        # # 创建子表单 "Toleranzprüfung" 并添加到 "Dokumentation" 中
+        # toleranzpruefung_form = ASX05.Form.Create('Toleranzprüfung')
+        # dokumentation_form.TryAddForm(toleranzpruefung_form)  # 将子表单添加到 Dokumentation 表单
+        # toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Summengrenzwert', 45.0))
+        # toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Summe-Startfrequenz', 20.0))
+        # toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Summe-Endfrequenz', 20000.0))
+        # toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Terzgrenzwert', 30.0))
+        # toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Terz-Startfrequenz', 100.0))
+        # toleranzpruefung_form.TryAddField(ASX05.RealField.Create('Luftschall-Terz-Endfrequenz', 16000.0))
+        #
+        # # 保存文档到指定路径
+        # # is_written = ASX05.DocumentationWriter.WriteDirectoryDocumentation(in_doc, out_path)
+        # is_written = ASX05.DocumentationWriter.Write(in_doc, out_path)
+        # print("isWritten:", is_written)
+        #
+        # # 释放许可证
+        # license_.Dispose()
+        #
+        # print(f"数据已成功写入{out_path}")
+        # messagebox.showinfo("Success", f"File exported successfully! {out_path}")
 
         # 打开文件保存对话框，限制文件类型为 xlsx 和 csv
         # file_path = filedialog.asksaveasfilename(
@@ -835,15 +846,15 @@ class OrderQueryPage(BasePage):
         #                        inplace=True)  # 重命名列
         #         self.df.fillna("", inplace=True)  # 填充空值
         #
-        #         hatx_outPath = r'C:\temp\Example'
-        #         inDoc = ASX05.Documentation.Create('Created by API')
+        #         hatx_out_path = r'C:\temp\Example'
+        #         in_doc = ASX05.Documentation.Create('Created by API')
         #
         #         for index, row in self.df.iterrows():
         #             row = row.tolist()
         #             for k, v in row.items():
         #                 textField = ASX05.TextField.Create(k, v)
-        #                 inDoc.AddField(textField)
-        #         isWritten = ASX05.DocumentationWriter.WriteDirectoryDocumentation(inDoc, hatx_outPath)
+        #                 in_doc.AddField(textField)
+        #         isWritten = ASX05.DocumentationWriter.WriteDirectoryDocumentation(in_doc, hatx_out_path)
         #         license_.Dispose()
         #         if isWritten:
         #             print("数据已成功写入 .hatx 文件！")
@@ -856,3 +867,124 @@ class OrderQueryPage(BasePage):
         #     except Exception as e:
         #         messagebox.showerror("Error",
         #                              f"An error occurred while exporting the file:\n{e}")
+
+    def create_pump_documentation(self, data_dict):
+        import clr
+        import sys
+
+        # 加载必要的程序集
+        sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+        clr.AddReference('HEADacoustics.API.Documentation')
+        clr.AddReference('HEADacoustics.API.License')
+
+        import HEADacoustics.API.Documentation as ASX05
+        from HEADacoustics.API.License import License, ProductCode
+
+        # 初始化许可证
+        license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+        # 定义文件路径
+        out_path = self.pump_documentation_path
+
+        # 创建新的文档
+        in_doc = ASX05.Documentation.Create('Dokumentation')
+
+        # 定义字段内容
+        text_fields = [
+            ('Kunde', data_dict.get("Kunde", "")),
+            ('Typ-Kurzbezeichnung', data_dict.get('Typ-Kurzbezeichnung', '')),
+            ('Sachnummer(SNR)', data_dict.get('Sachnummer(SNR)', '')),
+            ('Fertigungsdatum Pumpe', data_dict.get('Fertigungsdatum', '')),
+            ('Prüfung', data_dict.get('Prüfung', '')),
+            ('Prüfer', data_dict.get('Prüfer', '')),
+            ('Prüfdatum', data_dict.get('Prüfdatum', ''))
+        ]
+
+        # 创建并添加字段到文档
+        for label, label_value in text_fields:
+            text_field = ASX05.TextField.Create(label, label_value)
+            in_doc.AddField(text_field)
+
+        # 写入模板文件
+        is_written = ASX05.TemplateWriter.Write(in_doc, out_path)
+
+        # 释放许可证
+        license_.Dispose()
+
+    def create_pump_template(self, data_dict):
+        import clr
+        import sys
+
+        # 加载程序集
+        sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+        clr.AddReference('HEADacoustics.API.Documentation')
+        clr.AddReference('HEADacoustics.API.License')
+
+        import HEADacoustics.API.Documentation as ASX05
+        from HEADacoustics.API.License import License, ProductCode
+
+        # 初始化许可证
+        license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
+
+        # 定义路径
+        in_path = self.pump_documentation_path
+        out_path = self.pump_template_path
+
+        # 读取文档
+        in_doc = ASX05.TemplateReader.Read(in_path)
+        form_dokumentation = in_doc.TryGetForm('Dokumentation')
+
+        def add_form_with_fields(parent_form, form_name, fields):
+            """添加表单并填充字段"""
+            new_form = ASX05.Form.Create(form_name)
+            if parent_form.TryAddForm(new_form).ActionIsOk:
+                for field_name, field_value in fields.items():
+                    text_field = ASX05.TextField.Create(field_name, field_value)
+                    if new_form.TryAddField(text_field).ActionIsOk:
+                        text_field.IsEditable = True
+
+        # 配置表单和字段
+        forms_to_add = {
+            "Prüfling": {
+                "Prüfling-Nr.": data_dict.get('Prüfling-Nr', '')
+            },
+            "Prüfaufbau": {
+                "Prüfaufbau": data_dict.get('Prüfaufbau', ''),
+                "Messaufbau": data_dict.get('Messaufbau', '')
+            },
+            "Prüfvorgaben": {
+                "Prüfvorschrift": data_dict.get('Prüfvorschrift', ''),
+                "Fördermedium": data_dict.get('Fördermedium', ''),
+                "Prüf-Spannung": data_dict.get('Prüf-Spannung', ''),
+                "Testdauer": data_dict.get('Testdauer', ''),
+                "Prüf-Art": data_dict.get('Prüf-Art', ''),
+                "Luftschall - Meßabstand": data_dict.get('Luftschall - Meßabstand', ''),
+                "umgerechnet auf": data_dict.get('umgerechnet auf', ''),
+                "Förderdruck / Differenzdruck": data_dict.get('Förderdruck / Differenzdruck', ''),
+                "Durchfluß": data_dict.get('Durchfluß', ''),
+            },
+            "Toleranzprüfung": {
+                "Luftschall-Summengrenzwert": data_dict.get('Luftschall-Summengrenzwert', ''),
+                "Luftschall-Summe-Startfrequenz": data_dict.get('Luftschall-Summe-Startfrequenz', ''),
+                "Luftschall-Summe-Endfrequenz": data_dict.get('Luftschall-Summe-Endfrequenz', ''),
+                "Luftschall-Terzgrenzwert": data_dict.get('Luftschall-Terzgrenzwert', ''),
+                "Luftschall-Terz-Startfrequenz": data_dict.get('Luftschall-Terz-Startfrequenz', ''),
+                "Luftschall-Terz-Endfrequenz": data_dict.get('Luftschall-Terz-Endfrequenz', ''),
+                "Triax-Summengrenzwert": data_dict.get('Triax-Summengrenzwert', ''),
+                "Triax-Summe-Startfrequenz": data_dict.get('Triax-Summe-Startfrequenz', ''),
+                "Triax-Summe-Endfrequenz": data_dict.get('Triax-Summe-Endfrequenz', ''),
+                "Triax-Terzgrenzwert": data_dict.get('Triax-Terzgrenzwert', ''),
+                "Triax-Terz-Startfrequenz": data_dict.get('Triax-Terz-Startfrequenz', ''),
+                "Triax-Terz-Endfrequenz": data_dict.get('Triax-Terz-Endfrequenz', ''),
+            }
+        }
+
+        # 添加所有表单和字段
+        for form_name, fields in forms_to_add.items():
+            add_form_with_fields(form_dokumentation, form_name, fields)
+
+        # 写入文档
+        ASX05.TemplateWriter.Write(in_doc, out_path)
+
+        # 释放许可证
+        license_.Dispose()
