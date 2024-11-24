@@ -633,6 +633,11 @@ class OrderQueryPage(BasePage):
         test_typ = self.test_typ_entry.get()
         test_typ = self.query_mapping.get(test_typ, test_typ)
 
+        print(f"query sachnummer_value:$$${sachnummer_value}$$$")
+
+        for row in self.df["Sachnummer"]:
+            print(f"$$${row}$$$")
+
         # 如果两个输入框都有值，则使用 pandas 筛选
         if sachnummer_value and test_typ:
             self.display_df = self.df[
