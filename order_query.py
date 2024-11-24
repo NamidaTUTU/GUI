@@ -629,14 +629,14 @@ class OrderQueryPage(BasePage):
 
     def query_order(self):
         # 获取输入内容
-        sachnummer_value = self.sachnummer_entry.get()  # 获取 Motor Serial Number
-        test_typ = self.test_typ_entry.get()
+        sachnummer_value = self.sachnummer_entry.get().strip()  # 获取 Motor Serial Number
+        test_typ = self.test_typ_entry.get().strip()
         test_typ = self.query_mapping.get(test_typ, test_typ)
 
-        print(f"query sachnummer_value:$$${sachnummer_value}$$$")
+        # print(f"query sachnummer_value:$$${sachnummer_value}$$$")
 
-        for row in self.df["Sachnummer"]:
-            print(f"$$${row}$$$")
+        # for row in self.df["Sachnummer"]:
+        #     print(f"$$${row}$$$")
 
         # 如果两个输入框都有值，则使用 pandas 筛选
         if sachnummer_value and test_typ:
