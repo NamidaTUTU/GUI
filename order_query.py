@@ -126,6 +126,11 @@ class OrderQueryPage(BasePage):
             "Triax-Terz-Startfrequenz": "Hz",
             "Triax-Terz-Endfrequenz": "Hz",
         }
+        # 详情页按钮点击状态字典
+        self.button_click_mapping = {
+            # "Prüfling-Nr": {"generate_user_doc_button": "disable", "start_measurement_button": "enable"},
+            # "Prüfling-Nr-2": {"generate_user_doc_button": "enable", "start_measurement_button": "disable"},
+        }
         self.df = self.generate_mock_data()  # 创建 pandas DataFrame
         self.display_df = pd.DataFrame()  # 用于列表展示的df
         self.display_columns = ["Prüfnummer", "Sachnummer", "Fertigungsdatum", "Type of Measurement",
@@ -146,7 +151,9 @@ class OrderQueryPage(BasePage):
         #
         self.pump_documentation_path = r'C:\temp\pump_documentation.hatx'
         self.pump_template_path = r'C:\temp\pump_template.hatx'
-
+        #
+        self.generate_user_doc_button = None
+        self.start_measurement_button = None
 
     def draw(self):
         self.create_order_query_page()
@@ -412,11 +419,26 @@ class OrderQueryPage(BasePage):
                 # 保存每个字段的输入框到 entries 字典中
                 entries[label] = entry
 
+        #
+        button_frame = ttk.Frame(edit_window, borderwidth=2)  # relief="groove",
+        button_frame.grid(row=len(sections) + 1, column=0)
+
         # 增加按钮, 按钮布局在 sections 的后面
-        generate_user_doc_button = ttk.Button(edit_window, text="Generate UserDoc", width=20,
-                                              command=lambda: self.export_hatx_file(data_dict))
-        generate_user_doc_button['padding'] = (0, 10)  # 设置内边距来增加button高度
-        generate_user_doc_button.grid(row=len(sections) + 1, column=0, padx=0, pady=20)
+        self.generate_user_doc_button = ttk.Button(button_frame, text="Generate UserDoc", width=20,
+                                                   command=lambda: self.export_hatx_file(data_dict))
+        self.generate_user_doc_button['padding'] = (0, 10)  # 设置内边距来增加button高度
+        self.generate_user_doc_button.grid(row=0, column=0, padx=10, pady=20, sticky=ttk.NSEW)
+        self.generate_user_doc_button.config(
+            state=self.button_click_mapping.get(data_dict["Prüfling-Nr"], {}).get("generate_user_doc_button", "enable"))
+
+        # 开始测量按钮
+        self.start_measurement_button = ttk.Button(button_frame, text="Start Measurement", width=20,
+                                                   command=lambda: self.measurement(data_dict))
+        self.start_measurement_button['padding'] = (0, 10)  # 设置内边距来增加button高度
+        self.start_measurement_button.grid(row=0, column=1, padx=10, pady=20)
+        self.start_measurement_button.config(
+            state=self.button_click_mapping.get(data_dict["Prüfling-Nr"], {}).get("start_measurement_button",
+                                                                                  "disable"))
 
     def motro_detail(self, data_dict, test_id):
         # 创建一个新的窗口
@@ -748,10 +770,22 @@ class OrderQueryPage(BasePage):
 
     def export_hatx_file(self, data_dict):
         print(data_dict)
-        self.create_pump_documentation(data_dict)
-        self.create_pump_template(data_dict)
+        # TODO
+        # self.create_pump_documentation(data_dict)
+        # self.create_pump_template(data_dict)
         messagebox.showinfo("Success", f"File exported successfully! {self.pump_template_path}")
-
+        # 改变按钮状态
+        if data_dict["Prüfling-Nr"] in self.button_click_mapping:
+            self.button_click_mapping[data_dict["Prüfling-Nr"]]["generate_user_doc_button"] = "disable"
+            self.button_click_mapping[data_dict["Prüfling-Nr"]]["start_measurement_button"] = "enable"
+        else:
+            self.button_click_mapping[data_dict["Prüfling-Nr"]] = {"generate_user_doc_button": "disable",
+                                                                   "start_measurement_button": "enable"}
+        self.generate_user_doc_button.config(
+            state=self.button_click_mapping.get(data_dict["Prüfling-Nr"], {}).get("generate_user_doc_button", "enable"))
+        self.start_measurement_button.config(
+            state=self.button_click_mapping.get(data_dict["Prüfling-Nr"], {}).get("start_measurement_button",
+                                                                                  "disable"))
         # import clr
         # import System
         # import sys
@@ -992,4 +1026,39 @@ class OrderQueryPage(BasePage):
         ASX05.TemplateWriter.Write(in_doc, out_path)
 
         # 释放许可证
+        license_.Dispose()
+
+    def measurement(self, data_dict):
+        print("measurement method executing")
+        import clr
+        import sys
+
+        sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+        clr.AddReference('HEADacoustics.API.Remote')
+        clr.AddReference('HEADacoustics.API.License')
+
+        import HEADacoustics.API.Remote as ASX02
+        from HEADacoustics.API.Remote import Recorder as ASX04
+        from HEADacoustics.API.License import License, ProductCode
+
+        license_ = License.Create([ProductCode.ASX_04_DataAcquisitionAPI])
+
+        remoteClient = ASX02.ASXRemote.ForLatestApplication(True)
+        if not remoteClient.StandAloneRecorder.IsAvailable:
+            artemisSuiteClient = remoteClient.StandAloneRecorder.Start('/nolic').Wait()
+
+        recorder = remoteClient.Application.Recorder
+
+        # availFrontEnds = recorder.GetControlService().GetAvailableFrontends()
+        Path = r'\\head-tfs\TFSBinaries\Support\73183\Recorder Configuration.hrcx'
+
+        recorder.GetConfigurationService().LoadTrigger(Path)
+
+        startTrigger = recorder.GetTriggerService().SetStartSignalTrigger(0, ASX04.SlopeType.Falling, 'testa', 1.0)
+        # print(startTrigger)
+        # 这里使用 data["Prüfling-Nr"] 进行命名
+        recorder.GetControlService().SetFileNamePattern('Rising_Slope_Axis1_01.hdf')
+        recorder.GetTriggerService().SetStopDurationTrigger(0, 10)
+        recorder.GetControlService().StartRecord()
+
         license_.Dispose()
