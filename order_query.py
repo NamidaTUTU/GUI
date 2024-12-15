@@ -770,9 +770,8 @@ class OrderQueryPage(BasePage):
 
     def export_hatx_file(self, data_dict):
         print(data_dict)
-        # TODO
-        # self.create_pump_documentation(data_dict)
-        # self.create_pump_template(data_dict)
+        self.create_pump_documentation(data_dict)
+        self.create_pump_template(data_dict)
         messagebox.showinfo("Success", f"File exported successfully! {self.pump_template_path}")
         # 改变按钮状态
         if data_dict["Prüfling-Nr"] in self.button_click_mapping:
