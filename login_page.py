@@ -21,21 +21,24 @@ class LoginPage(BasePage):
         self.font = ("Arial", 14)
         self.username_entry = None
         self.password_entry = None
+        self.login_button = None
 
     def draw(self):
         """绘制"""
         # 使用 grid 布局
-        ttk.Label(self, text="Username:", font=self.font).grid(row=1, column=1, sticky=ttk.E)
+        self.username_label = ttk.Label(self, text="Username:", font=self.font)
+        self.username_label.grid(row=1, column=1, sticky=ttk.E)
         self.username_entry = ttk.Entry(self, font=self.font, width=20)
         self.username_entry.grid(row=1, column=2, sticky=ttk.W)
 
-        ttk.Label(self, text="Password:", font=self.font).grid(row=2, column=1, sticky=ttk.E)
+        self.password_label = ttk.Label(self, text="Password:", font=self.font)
+        self.password_label.grid(row=2, column=1, sticky=ttk.E)
         self.password_entry = ttk.Entry(self, show='*', font=self.font, width=20)
         self.password_entry.grid(row=2, column=2, sticky=ttk.W)
 
-        login_button = ttk.Button(self, text="Login", command=self.login, width=10)
+        self.login_button = ttk.Button(self, text="Login", command=self.login, width=10)
         self.master.bind("<Return>", self.login)  # 绑定回车键到登录操作(fix self.bind --> self.master.bind)
-        login_button.grid(row=3, column=1, columnspan=2)
+        self.login_button.grid(row=3, column=1, columnspan=2)
 
         # 为所有元素设置全局的 padx 和 pady
         for widget in self.grid_slaves():
@@ -45,8 +48,8 @@ class LoginPage(BasePage):
         username = self.username_entry.get()
         password = self.password_entry.get()
         # TODO test
-        username = "admin"
-        password = "1234"
+        # username = "admin"
+        # password = "1234"
 
         # 登录验证逻辑
         if username == "admin" and password == "1234":  # 示例条件
