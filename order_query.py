@@ -164,8 +164,8 @@ class OrderQueryPage(BasePage):
         self.inner_frame.grid(row=0, column=0, padx=20, pady=20, sticky=ttk.EW)
 
         # 输入框和下拉框
-        sachnummer_label = ttk.Label(self.inner_frame, text="Sachnummer:", font=self.font)
-        sachnummer_label.grid(row=0, column=0, padx=10, pady=10, sticky=ttk.E)
+        self.sachnummer_label = ttk.Label(self.inner_frame, text="Sachnummer:", font=self.font)
+        self.sachnummer_label.grid(row=0, column=0, padx=10, pady=10, sticky=ttk.E)
         if platform.system() == "Windows":
             width = 27
         else:
@@ -173,26 +173,26 @@ class OrderQueryPage(BasePage):
         self.sachnummer_entry = ttk.Entry(self.inner_frame, font=self.font, width=width)
         self.sachnummer_entry.grid(row=0, column=1, padx=10, pady=10, sticky=ttk.W)
 
-        test_typ_label = ttk.Label(self.inner_frame, text="Type of Measurement:", font=self.font)
-        test_typ_label.grid(row=0, column=2, padx=10, pady=10, sticky=ttk.E)
+        self.test_typ_label = ttk.Label(self.inner_frame, text="Type of Measurement:", font=self.font)
+        self.test_typ_label.grid(row=0, column=2, padx=10, pady=10, sticky=ttk.E)
         self.test_typ_entry = ttk.Combobox(self.inner_frame, font=self.font, width=29, values=self.test_typs)
         self.test_typ_entry.grid(row=0, column=3, padx=10, pady=10, sticky=ttk.W)
 
         # 清空按钮
-        clear_button = ttk.Button(self.inner_frame, text="Clear", command=self.clear_query)
-        clear_button.grid(row=0, column=4, padx=10, pady=10, sticky=ttk.W)
+        self.clear_button = ttk.Button(self.inner_frame, text="Clear", command=self.clear_query)
+        self.clear_button.grid(row=0, column=4, padx=10, pady=10, sticky=ttk.W)
 
         # 查询按钮
-        query_button = ttk.Button(self.inner_frame, text="Query", command=self.query_order)
-        query_button.grid(row=0, column=5, padx=10, pady=10, sticky=ttk.W)
+        self.query_button = ttk.Button(self.inner_frame, text="Query", command=self.query_order)
+        self.query_button.grid(row=0, column=5, padx=10, pady=10, sticky=ttk.W)
 
         # 导入文件按钮
-        import_button = ttk.Button(self.inner_frame, text="Import File", command=self.import_file)
-        import_button.grid(row=0, column=6, padx=10, pady=10, sticky=ttk.W)
+        self.import_button = ttk.Button(self.inner_frame, text="Import File", command=self.import_file)
+        self.import_button.grid(row=0, column=6, padx=10, pady=10, sticky=ttk.W)
 
         # 导出文件按钮
-        export_button = ttk.Button(self.inner_frame, text="Export File", command=self.export_file)
-        export_button.grid(row=0, column=7, padx=10, pady=10, sticky=ttk.W)
+        self.export_button = ttk.Button(self.inner_frame, text="Export File", command=self.export_file)
+        self.export_button.grid(row=0, column=7, padx=10, pady=10, sticky=ttk.W)
 
         # 导出hatx文件按钮
         # export_button = ttk.Button(self.inner_frame, text="Export Hatx File", command=self.export_hatx_file)
@@ -224,10 +224,10 @@ class OrderQueryPage(BasePage):
         # 设置Treeview的表头样式
         style.configure("Treeview.Heading", background="gray", foreground="black", font=self.title_font, relief="solid")
         # 创建表格容器,放置滚动条
-        tabel_frame = ttk.Frame(self.inner_frame)
-        tabel_frame.grid(row=1, column=0, columnspan=8, padx=10, pady=20, sticky=ttk.NSEW)
+        self.tabel_frame = ttk.Frame(self.inner_frame)
+        self.tabel_frame.grid(row=1, column=0, columnspan=8, padx=10, pady=20, sticky=ttk.NSEW)
 
-        self.tree = ttk.Treeview(tabel_frame, height=15, columns=self.display_columns, show="headings")
+        self.tree = ttk.Treeview(self.tabel_frame, height=15, columns=self.display_columns, show="headings")
         # 设置列标题
         for col in self.display_columns:
             self.tree.heading(col, text=col)
@@ -245,14 +245,14 @@ class OrderQueryPage(BasePage):
         self.tree.grid(row=0, column=0, sticky=ttk.NSEW)
 
         # 创建垂直滚动条
-        scrollbar = Scrollbar(tabel_frame, orient=ttk.VERTICAL, command=self.tree.yview)
-        self.tree.configure(yscrollcommand=scrollbar.set)
-        scrollbar.grid(row=0, column=1, sticky=ttk.NS)
+        self.scrollbar = Scrollbar(self.tabel_frame, orient=ttk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.grid(row=0, column=1, sticky=ttk.NS)
 
         # 创建水平滚动条
-        hscrollbar = Scrollbar(tabel_frame, orient=ttk.HORIZONTAL, command=self.tree.xview)
-        self.tree.configure(xscrollcommand=hscrollbar.set)
-        hscrollbar.grid(row=1, column=0, sticky=ttk.EW)
+        self.hscrollbar = Scrollbar(self.tabel_frame, orient=ttk.HORIZONTAL, command=self.tree.xview)
+        self.tree.configure(xscrollcommand=self.hscrollbar.set)
+        self.hscrollbar.grid(row=1, column=0, sticky=ttk.EW)
 
         # Binding double-click event
         self.tree.bind("<Double-1>", self.on_row_double_click)

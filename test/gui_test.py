@@ -158,6 +158,143 @@ class TestMainApplicationPage(unittest.TestCase):
         self.assertEquals(tab_names, ["查询订单", "其他功能1"])
 
 
+class TestOrderQueryPage(unittest.TestCase):
+    def setUp(self):
+        self.master = ttk.Window()
+        # 控制器
+        self.controller = Controller(self.master)
+        self.controller.login_page.destroy()
+        # 进入主页面
+        self.controller.main_application_page = MainApplicationPage(self.master, self)
+        self.controller.main_application_page.draw()
+        self.master.update_idletasks()
+        #
+        self.order_query_page = self.controller.main_application_page.order_query_page
+
+    def tearDown(self):
+        # 延时销毁以避免 TclError
+        self.master.after(100, self.master.destroy)
+        # 确保足够的时间完成操作
+        time.sleep(0.1)
+        # 停止主循环
+        self.master.quit()
+        # 销毁主窗口
+        self.master.destroy()
+
+    def test_create_order_query_page(self):
+        """Test if order query page is created."""
+        title = self.master.title()
+        self.assertEquals("Main Application", title)
+
+        # 断言order_query_page存在
+        order_query_page_winfo_exists = self.controller.main_application_page.order_query_page.winfo_exists()
+        self.assertEquals(order_query_page_winfo_exists, True)
+
+        # 断言order_query_page的width和height
+        order_query_page_width = self.controller.main_application_page.order_query_page.winfo_width()
+        order_query_page_height = self.controller.main_application_page.order_query_page.winfo_height()
+        self.assertEquals(order_query_page_width, self.order_query_page.winfo_width())
+        self.assertEquals(order_query_page_height, self.order_query_page.winfo_height())
+
+    def test_order_query_page_attributes(self):
+        """Test if order query page attributes are set."""
+        # 断言order_query_page 包含 test_typs attribute
+        self.assertTrue(hasattr(self.controller.main_application_page.order_query_page, "test_typs"))
+
+        # 断言order_query_page 包含 query_mapping attribute
+        self.assertTrue(hasattr(self.controller.main_application_page.order_query_page, "query_mapping"))
+
+        # 断言order_query_page 包含 column_mapping attribute
+        self.assertTrue(hasattr(self.controller.main_application_page.order_query_page, "column_mapping"))
+
+        # 断言order_query_page 包含 unit_mapping attribute
+        self.assertTrue(hasattr(self.controller.main_application_page.order_query_page, "unit_mapping"))
+
+        # 断言order_query_page 包含 button_click_mapping attribute
+        self.assertTrue(hasattr(self.controller.main_application_page.order_query_page, "button_click_mapping"))
+
+        # 断言order_query_page 包含 display_columns attribute
+        self.assertTrue(hasattr(self.controller.main_application_page.order_query_page, "display_columns"))
+
+        # 断言order_query_page 包含 display_df attribute
+        self.assertTrue(hasattr(self.controller.main_application_page.order_query_page, "display_df"))
+
+    def test_order_query_page_elements(self):
+        """Test if order query page elements are present."""
+        # 输入框和下拉框
+        sachnummer_label_winfo_exists = self.order_query_page.sachnummer_label.winfo_exists()
+        self.assertEquals(sachnummer_label_winfo_exists, True)
+        sachnummer_label = self.order_query_page.sachnummer_label.cget("text")
+        self.assertEquals(sachnummer_label, "Sachnummer:")
+        sachnummer_entry_winfo_exists = self.order_query_page.sachnummer_entry.winfo_exists()
+        self.assertEquals(sachnummer_entry_winfo_exists, True)
+
+        test_typ_label_winfo_exists = self.order_query_page.test_typ_label.winfo_exists()
+        self.assertEquals(test_typ_label_winfo_exists, True)
+        test_typ_label = self.order_query_page.test_typ_label.cget("text")
+        self.assertEquals(test_typ_label, "Type of Measurement:")
+        test_typ_entry_winfo_exists = self.order_query_page.test_typ_entry.winfo_exists()
+        self.assertEquals(test_typ_entry_winfo_exists, True)
+
+        # 清空
+        clear_button_winfo_exists = self.order_query_page.clear_button.winfo_exists()
+        self.assertEquals(clear_button_winfo_exists, True)
+        clear_button_text = self.order_query_page.clear_button.cget("text")
+        self.assertEquals(clear_button_text, "Clear")
+
+        # 查询
+        query_button_winfo_exists = self.order_query_page.query_button.winfo_exists()
+        self.assertEquals(query_button_winfo_exists, True)
+        query_button_text = self.order_query_page.query_button.cget("text")
+        self.assertEquals(query_button_text, "Query")
+
+        # 导入
+        import_button_winfo_exists = self.order_query_page.import_button.winfo_exists()
+        self.assertEquals(import_button_winfo_exists, True)
+        import_button_text = self.order_query_page.import_button.cget("text")
+        self.assertEquals(import_button_text, "Import File")
+
+        # 导出
+        export_button_winfo_exists = self.order_query_page.export_button.winfo_exists()
+        self.assertEquals(export_button_winfo_exists, True)
+        export_button_text = self.order_query_page.export_button.cget("text")
+        self.assertEquals(export_button_text, "Export File")
+
+        # 断言order_query_page的tree存在
+        order_query_page_tree_winfo_exists = self.order_query_page.tree.winfo_exists()
+        self.assertEquals(order_query_page_tree_winfo_exists, True)
+
+        # 断言order_query_page的scrollbar存在
+        order_query_page_scrollbar_winfo_exists = self.order_query_page.scrollbar.winfo_exists()
+        self.assertEquals(order_query_page_scrollbar_winfo_exists, True)
+
+        # 断言order_query_page的hscrollbar存在
+        order_query_page_hscrollbar_winfo_exists = self.order_query_page.hscrollbar.winfo_exists()
+        self.assertEquals(order_query_page_hscrollbar_winfo_exists, True)
+
+        # 断言order_query_page的prev_button存在
+        order_query_page_prev_button_winfo_exists = self.order_query_page.prev_button.winfo_exists()
+        self.assertEquals(order_query_page_prev_button_winfo_exists, True)
+        prev_button_text = self.order_query_page.prev_button.cget("text")
+        self.assertEquals(prev_button_text, "Previous Page")
+
+        # 断言order_query_page的next_button存在
+        order_query_page_next_button_winfo_exists = self.order_query_page.next_button.winfo_exists()
+        self.assertEquals(order_query_page_next_button_winfo_exists, True)
+        next_button_text = self.order_query_page.next_button.cget("text")
+        self.assertEquals(next_button_text, "Next Page")
+
+        # 断言order_query_page的page_label存在
+        order_query_page_page_label_winfo_exists = self.order_query_page.page_label.winfo_exists()
+        self.assertEquals(order_query_page_page_label_winfo_exists, True)
+        page_label_text = self.order_query_page.page_label.cget("text")
+        self.assertTrue("Page" in page_label_text and "/" in page_label_text)
+
+    def test_import_excel_file(self):
+        """测试导入excel文件数据"""
+        pass
+
+
 if __name__ == "__main__":
     unittest.main()
 
