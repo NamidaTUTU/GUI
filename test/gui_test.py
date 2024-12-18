@@ -7,6 +7,7 @@ from tkinter import messagebox, filedialog
 
 from controller import Controller
 from login_page import LoginPage
+from main_application import MainApplicationPage
 
 
 # from typing import Callable, Optional
@@ -92,6 +93,69 @@ class TestMainAppLogin(unittest.TestCase):
         # 断言main_application_page的title 不是 Main Application
         main_application_page_title = self.master.title()
         self.assertEquals(main_application_page_title, "Order Management System")
+
+
+class TestMainApplicationPage(unittest.TestCase):
+    def setUp(self):
+        self.master = ttk.Window()
+        # 控制器
+        self.controller = Controller(self.master)
+        self.controller.login_page.destroy()
+        # 进入主页面
+        self.controller.main_application_page = MainApplicationPage(self.master, self)
+        self.controller.main_application_page.draw()
+        self.master.update_idletasks()
+
+    def tearDown(self):
+        # 延时销毁以避免 TclError
+        self.master.after(100, self.master.destroy)
+        # 确保足够的时间完成操作
+        time.sleep(0.1)
+        # 停止主循环
+        self.master.quit()
+        # 销毁主窗口
+        self.master.destroy()
+
+    def test_create_main_application_page(self):
+        title = self.master.title()
+        self.assertEquals("Main Application", title)
+
+        # 断言main_application_page存在
+        main_application_page_winfo_exists = self.controller.main_application_page.winfo_exists()
+        self.assertEquals(main_application_page_winfo_exists, True)
+
+        # 断言main_application_page的width和height
+        main_application_page_width = self.controller.main_application_page.width
+        main_application_page_height = self.controller.main_application_page.height
+        self.assertEquals(main_application_page_width, self.master.winfo_screenwidth() * 0.8)
+        self.assertEquals(main_application_page_height, self.master.winfo_screenheight() * 0.8)
+
+    def test_main_application_page_elements(self):
+        """Test if main application page elements are present."""
+        # 断言main_application_page的notebook存在
+        notebook_winfo_exists = self.controller.main_application_page.notebook.winfo_exists()
+        self.assertEquals(notebook_winfo_exists, True)
+
+        # 断言main_application_page的order_query_page存在
+        order_query_page_winfo_exists = self.controller.main_application_page.order_query_page.winfo_exists()
+        self.assertEquals(order_query_page_winfo_exists, True)
+
+        # 断言main_application_page的order_detail_page存在
+        order_detail_page_winfo_exists = self.controller.main_application_page.order_detail_page.winfo_exists()
+        self.assertEquals(order_detail_page_winfo_exists, True)
+
+        # 断言main_application_page的order_query_page的title是否为Order Query
+        notebook = self.controller.main_application_page.order_query_page.master
+        # 获取第一个选项卡的名称
+        order_query_page_table_name = notebook.tab(0, "text")
+        self.assertEquals(order_query_page_table_name, "查询订单")
+        # 获取第二个选项卡的名称
+        other_func_page_table_name = notebook.tab(1, "text")
+        self.assertEquals(other_func_page_table_name, "其他功能1")
+        # 获取所有选项卡的名称
+        tab_names = [notebook.tab(i, "text") for i in range(notebook.index("end"))]
+        # print(tab_names)  # 输出: ['选项卡 1', '选项卡 2']
+        self.assertEquals(tab_names, ["查询订单", "其他功能1"])
 
 
 if __name__ == "__main__":
