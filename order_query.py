@@ -696,8 +696,9 @@ class OrderQueryPage(BasePage):
         self.update_pagination_buttons()
 
     def import_file(self):
+        self.filedialog = filedialog
         # 打开文件选择对话框，限制文件类型为 xlsx 和 csv
-        file_path = filedialog.askopenfilename(
+        file_path = self.filedialog.askopenfilename(
             filetypes=[("Excel files", "*.xlsx"), ("CSV files", "*.csv")],
             title="Select a file"
         )

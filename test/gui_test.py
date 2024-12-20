@@ -1,3 +1,4 @@
+import os.path
 import time
 import unittest
 from unittest.mock import patch
@@ -290,9 +291,53 @@ class TestOrderQueryPage(unittest.TestCase):
         page_label_text = self.order_query_page.page_label.cget("text")
         self.assertTrue("Page" in page_label_text and "/" in page_label_text)
 
-    def test_import_excel_file(self):
-        """测试导入excel文件数据"""
-        pass
+    @patch('tkinter.messagebox.showerror')
+    @patch("tkinter.filedialog.askopenfilename")
+    def test_import_excel_file_to_failed(self, mock_askopenfilename, mock_showerror):
+        """
+        测试导入excel文件数据
+        找不到文件路径而报错
+        """
+        # 前置条件设置 mock_askopenfilename 值
+        mock_askopenfilename.return_value = "/path/to/excel.xlsx"
+        file_path = mock_askopenfilename.return_value
+        # 调用函数并断言返回值
+        self.assertEquals(file_path, "/path/to/excel.xlsx")
+
+        # Simulate button click
+        self.order_query_page.import_button.invoke()
+        # 验证 askopenfilename 被调用
+        print("call_count:", mock_askopenfilename.call_count)
+        # mock_askopenfilename.assert_called_once()
+        # 验证 askopenfilename 被调用过
+        mock_askopenfilename.assert_called()
+
+        # 验证 showerror 被调用，并且传递了正确的参数
+        mock_showerror.assert_called_once_with("Error", "An error occurred while importing the file:\n[Errno 2] No such file or directory: '/path/to/excel.xlsx'")
+
+    @patch('tkinter.messagebox.showerror')
+    @patch("tkinter.filedialog.askopenfilename")
+    def test_import_excel_file_to_failed_by_unsupported_file_format(self, mock_askopenfilename, mock_showerror):
+        """
+        测试导入excel文件数据
+        不能解析的文件格式错误
+        """
+        # 前置条件设置 mock_askopenfilename 值
+        mock_askopenfilename.return_value = "/path/to/excel.txt"  # unsupported_file_format
+        file_path = mock_askopenfilename.return_value
+        # 调用函数并断言返回值
+        self.assertEquals(file_path, "/path/to/excel.txt")
+
+        # Simulate button click
+        self.order_query_page.import_button.invoke()
+        # 验证 askopenfilename 被调用
+        print("call_count:", mock_askopenfilename.call_count)
+        # mock_askopenfilename.assert_called_once()
+        # 验证 askopenfilename 被调用过
+        mock_askopenfilename.assert_called()
+
+        # 验证 showerror 被调用，并且传递了正确的参数
+        mock_showerror.assert_called_once_with("Error", "Unsupported file format.")
 
 
 if __name__ == "__main__":
