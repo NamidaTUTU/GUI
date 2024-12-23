@@ -171,6 +171,9 @@ class TestOrderQueryPage(unittest.TestCase):
         self.master.update_idletasks()
         #
         self.order_query_page = self.controller.main_application_page.order_query_page
+        #
+        self.pumpe_messung_template_file_path = "../data/Pumpe_Messung_template.xlsx"
+        self.pumpe_messung_template_length = 9
 
     def tearDown(self):
         # 延时销毁以避免 TclError
@@ -308,7 +311,7 @@ class TestOrderQueryPage(unittest.TestCase):
         self.order_query_page.import_button.invoke()
         # 验证 askopenfilename 被调用
         print("call_count:", mock_askopenfilename.call_count)
-        # mock_askopenfilename.assert_called_once()
+        mock_askopenfilename.assert_called_once()
         # 验证 askopenfilename 被调用过
         mock_askopenfilename.assert_called()
 
@@ -332,12 +335,170 @@ class TestOrderQueryPage(unittest.TestCase):
         self.order_query_page.import_button.invoke()
         # 验证 askopenfilename 被调用
         print("call_count:", mock_askopenfilename.call_count)
-        # mock_askopenfilename.assert_called_once()
+        mock_askopenfilename.assert_called_once()
         # 验证 askopenfilename 被调用过
         mock_askopenfilename.assert_called()
 
         # 验证 showerror 被调用，并且传递了正确的参数
         mock_showerror.assert_called_once_with("Error", "Unsupported file format.")
+
+    @patch('tkinter.messagebox.showinfo')
+    @patch("tkinter.filedialog.askopenfilename")
+    def test_import_excel_file_to_success(self, mock_askopenfilename, mock_showinfo):
+        # 前置条件设置 mock_askopenfilename 值 (这里需要设置正确的文件路径, 才能正确导入文件)
+        mock_askopenfilename.return_value = self.pumpe_messung_template_file_path
+        file_path = mock_askopenfilename.return_value
+        # 调用函数并断言返回值
+        self.assertEquals(file_path, self.pumpe_messung_template_file_path)
+
+        # 断言 tree 存在并且长度等于0
+        order_query_page_tree_winfo_exists = self.order_query_page.tree.winfo_exists()
+        self.assertEquals(order_query_page_tree_winfo_exists, True)
+        tree_length = len(self.order_query_page.tree.get_children())
+        self.assertEquals(tree_length, 0)
+
+        # Simulate button click
+        self.order_query_page.import_button.invoke()
+        # 验证 askopenfilename 被调用
+        print("call_count:", mock_askopenfilename.call_count)
+        mock_askopenfilename.assert_called_once()
+        # 验证 askopenfilename 被调用过
+        mock_askopenfilename.assert_called()
+
+        # 验证 showinfo 被调用，并且传递了正确的参数
+        mock_showinfo.assert_called_once_with("Success", "File imported successfully!")
+
+        # 断言 tree 存在并且长度等于导入数据的长度
+        order_query_page_tree_winfo_exists = self.order_query_page.tree.winfo_exists()
+        self.assertEquals(order_query_page_tree_winfo_exists, True)
+        tree_length = len(self.order_query_page.tree.get_children())
+        #
+        self.assertEquals(tree_length, self.pumpe_messung_template_length)
+
+        # 断言分页内容
+        # 断言order_query_page的prev_button存在
+        order_query_page_prev_button_winfo_exists = self.order_query_page.prev_button.winfo_exists()
+        self.assertEquals(order_query_page_prev_button_winfo_exists, True)
+        prev_button_text = self.order_query_page.prev_button.cget("text")
+        self.assertEquals(prev_button_text, "Previous Page")
+        # 断言order_query_page的prev_button不可用
+        order_query_page_prev_button_state = self.order_query_page.prev_button.cget('state').string
+        self.assertEquals(order_query_page_prev_button_state, "disabled")
+
+        # 断言order_query_page的next_button存在
+        order_query_page_next_button_winfo_exists = self.order_query_page.next_button.winfo_exists()
+        self.assertEquals(order_query_page_next_button_winfo_exists, True)
+        next_button_text = self.order_query_page.next_button.cget("text")
+        self.assertEquals(next_button_text, "Next Page")
+        # 断言order_query_page的next_button不可用
+        order_query_page_next_button_state = self.order_query_page.next_button.cget('state').string
+        self.assertEquals(order_query_page_next_button_state, "disabled")
+
+        # 断言order_query_page的page_label存在
+        order_query_page_page_label_winfo_exists = self.order_query_page.page_label.winfo_exists()
+        self.assertEquals(order_query_page_page_label_winfo_exists, True)
+        page_label_text = self.order_query_page.page_label.cget("text")
+        self.assertEquals(page_label_text, "Page 1 / 1")  # 每页10条
+
+    @patch('tkinter.messagebox.showinfo')
+    @patch("tkinter.filedialog.askopenfilename")
+    def test_query_data(self, mock_askopenfilename, mock_showinfo):
+        """Test if query data is correct."""
+        # 导入数据
+        mock_askopenfilename.return_value = self.pumpe_messung_template_file_path
+        file_path = mock_askopenfilename.return_value
+        # 调用函数并断言返回值
+        self.assertEquals(file_path, self.pumpe_messung_template_file_path)
+        # Simulate button click
+        self.order_query_page.import_button.invoke()
+        # 验证 askopenfilename 被调用
+        mock_askopenfilename.assert_called_once()
+        # 检查第一次 showinfo 被调用，并且传递了正确的参数
+        first_call_args = mock_showinfo.call_args_list[0]
+        first_call_args.assert_called_once_with("Success", "File imported successfully!")
+        # 断言 tree 存在并且长度等于导入数据的长度
+        order_query_page_tree_winfo_exists = self.order_query_page.tree.winfo_exists()
+        self.assertEquals(order_query_page_tree_winfo_exists, True)
+        tree_length = len(self.order_query_page.tree.get_children())
+        self.assertEquals(tree_length, self.pumpe_messung_template_length)
+
+        # 设置查询参数
+        self.order_query_page.sachnummer_entry.insert(0, "039020243F")
+        # test_typ_entry 参数可选值列表
+        # ["A", "Q", "Z", "Null-Serie", "Claim（TKU）", "Sonder", "BlockForce"]
+        # self.order_query_page.test_typ_entry.set("Null-Serie")
+        self.order_query_page.test_typ_entry.insert(0, "Sonder")
+
+        # Simulate button click
+        self.order_query_page.query_button.invoke()
+
+        # 检查第二次 showinfo 被调用，并且传递了正确的参数
+        second_call_args = mock_showinfo.call_args_list[1]
+        second_call_args.assert_called_once_with("info", "Query successful")
+
+        # 断言 tree 存在并且长度等于筛选后数据的长度
+        tree_length = len(self.order_query_page.tree.get_children())
+        pumpe_messung_filtered_data_length = 1
+        self.assertEquals(tree_length, pumpe_messung_filtered_data_length)
+
+    @patch('tkinter.messagebox.showinfo')
+    @patch("tkinter.filedialog.askopenfilename")
+    def test_clear_query(self, mock_askopenfilename, mock_showinfo):
+        """Test if clear query is correct."""
+        # 导入数据
+        mock_askopenfilename.return_value = self.pumpe_messung_template_file_path
+        file_path = mock_askopenfilename.return_value
+        # 调用函数并断言返回值
+        self.assertEquals(file_path, self.pumpe_messung_template_file_path)
+        # Simulate button click
+        self.order_query_page.import_button.invoke()
+        # 验证 askopenfilename 被调用
+        mock_askopenfilename.assert_called_once()
+        # 检查第一次 showinfo 被调用，并且传递了正确的参数
+        first_call_args = mock_showinfo.call_args_list[0]
+        first_call_args.assert_called_once_with("Success", "File imported successfully!")
+        # 断言 tree 存在并且长度等于导入数据的长度
+        order_query_page_tree_winfo_exists = self.order_query_page.tree.winfo_exists()
+        self.assertEquals(order_query_page_tree_winfo_exists, True)
+        tree_length = len(self.order_query_page.tree.get_children())
+        self.assertEquals(tree_length, self.pumpe_messung_template_length)
+
+        # 设置查询参数
+        self.order_query_page.sachnummer_entry.insert(0, "039020243F")
+        # test_typ_entry 参数可选值列表
+        # ["A", "Q", "Z", "Null-Serie", "Claim（TKU）", "Sonder", "BlockForce"]
+        # self.order_query_page.test_typ_entry.set("Null-Serie")
+        self.order_query_page.test_typ_entry.insert(0, "Sonder")
+
+        # Simulate button click
+        self.order_query_page.query_button.invoke()
+
+        # 检查第二次 showinfo 被调用，并且传递了正确的参数
+        second_call_args = mock_showinfo.call_args_list[1]
+        second_call_args.assert_called_once_with("info", "Query successful")
+
+        # 断言 tree 存在并且长度等于筛选后数据的长度
+        tree_length = len(self.order_query_page.tree.get_children())
+        pumpe_messung_filtered_data_length = 1
+        self.assertEquals(tree_length, pumpe_messung_filtered_data_length)
+
+        # Simulate clear_button click
+        self.order_query_page.clear_button.invoke()
+        # 断言 查询参数清空
+        self.assertEquals(self.order_query_page.sachnummer_entry.get(), "")
+        self.assertEquals(self.order_query_page.test_typ_entry.get(), "")
+
+        # 检查第三次 showinfo 被调用，并且传递了正确的参数
+        # third_call_args = mock_showinfo.call_args_list[2]
+        # third_call_args.assert_called_once_with("info", "Query cleared")
+
+        # 断言 tree 存在并且长度等于筛选后数据的长度
+        tree_length = len(self.order_query_page.tree.get_children())
+        self.assertEquals(tree_length, self.pumpe_messung_template_length)
+
+    def test_detail_page_elements(self):
+        """Test if detail page elements are correct."""
+        pass
 
 
 if __name__ == "__main__":

@@ -81,7 +81,7 @@ class OrderQueryPage(BasePage):
         # query 字典
         self.query_mapping = {
             "Null-Serie": "0",
-            "Sonder": "s",
+            "Sonder": "S",
         }
         self.column_mapping = {
             "Type of Measurment": "Type of Measurement",
