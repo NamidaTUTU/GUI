@@ -152,6 +152,8 @@ class OrderQueryPage(BasePage):
         self.pump_documentation_path = r'C:\temp\pump_documentation.hatx'
         self.pump_template_path = r'C:\temp\pump_template.hatx'
         #
+        self.edit_window = None
+        self.button_frame = None
         self.generate_user_doc_button = None
         self.start_measurement_button = None
 
@@ -294,10 +296,10 @@ class OrderQueryPage(BasePage):
 
     def pump_detail(self, data_dict):
         # 创建一个新的窗口
-        edit_window = ttk.Toplevel(self)
+        self.edit_window = ttk.Toplevel(self)
         # 设置窗口大小和布局
-        edit_window.resizable(False, False)
-        edit_window.title("Edit Row Data")
+        self.edit_window.resizable(False, False)
+        self.edit_window.title("Edit Row Data")
 
         # 不可编辑字段的列表
         readonly_fields = [
@@ -370,7 +372,7 @@ class OrderQueryPage(BasePage):
         # 创建每个部分的框架
         for row, (section, labels) in enumerate(sections.items()):
             # 添加分区标题
-            frame_section = ttk.Frame(edit_window, relief="groove", borderwidth=2)
+            frame_section = ttk.Frame(self.edit_window, relief="groove", borderwidth=2)
             # frame_section.pack(fill="x", padx=10, pady=10)
             frame_section.grid(row=row, column=0, sticky=ttk.NSEW)
 
@@ -420,11 +422,11 @@ class OrderQueryPage(BasePage):
                 entries[label] = entry
 
         #
-        button_frame = ttk.Frame(edit_window, borderwidth=2)  # relief="groove",
-        button_frame.grid(row=len(sections) + 1, column=0)
+        self.button_frame = ttk.Frame(self.edit_window, borderwidth=2)  # relief="groove",
+        self.button_frame.grid(row=len(sections) + 1, column=0)
 
         # 增加按钮, 按钮布局在 sections 的后面
-        self.generate_user_doc_button = ttk.Button(button_frame, text="Generate UserDoc", width=20,
+        self.generate_user_doc_button = ttk.Button(self.button_frame, text="Generate UserDoc", width=20,
                                                    command=lambda: self.export_hatx_file(data_dict))
         self.generate_user_doc_button['padding'] = (0, 10)  # 设置内边距来增加button高度
         self.generate_user_doc_button.grid(row=0, column=0, padx=10, pady=20, sticky=ttk.NSEW)
@@ -432,7 +434,7 @@ class OrderQueryPage(BasePage):
             state=self.button_click_mapping.get(data_dict["Prüfling-Nr"], {}).get("generate_user_doc_button", "enable"))
 
         # 开始测量按钮
-        self.start_measurement_button = ttk.Button(button_frame, text="Start Measurement", width=20,
+        self.start_measurement_button = ttk.Button(self.button_frame, text="Start Measurement", width=20,
                                                    command=lambda: self.measurement(data_dict))
         self.start_measurement_button['padding'] = (0, 10)  # 设置内边距来增加button高度
         self.start_measurement_button.grid(row=0, column=1, padx=10, pady=20)

@@ -1,7 +1,7 @@
 import os.path
 import time
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock, Mock
 
 import ttkbootstrap as ttk
 from tkinter import messagebox, filedialog
@@ -316,7 +316,8 @@ class TestOrderQueryPage(unittest.TestCase):
         mock_askopenfilename.assert_called()
 
         # 验证 showerror 被调用，并且传递了正确的参数
-        mock_showerror.assert_called_once_with("Error", "An error occurred while importing the file:\n[Errno 2] No such file or directory: '/path/to/excel.xlsx'")
+        mock_showerror.assert_called_once_with("Error",
+                                               "An error occurred while importing the file:\n[Errno 2] No such file or directory: '/path/to/excel.xlsx'")
 
     @patch('tkinter.messagebox.showerror')
     @patch("tkinter.filedialog.askopenfilename")
@@ -496,14 +497,135 @@ class TestOrderQueryPage(unittest.TestCase):
         tree_length = len(self.order_query_page.tree.get_children())
         self.assertEquals(tree_length, self.pumpe_messung_template_length)
 
+
+class TestDetailPage(unittest.TestCase):
+    """Test DetailPage class."""
+
+    @patch('tkinter.messagebox.showinfo')
+    @patch("tkinter.filedialog.askopenfilename")
+    def setUp(self, mock_askopenfilename, mock_showinfo):
+        self.master = ttk.Window()
+        # 控制器
+        self.controller = Controller(self.master)
+        self.controller.login_page.destroy()
+        # 进入主页面
+        self.controller.main_application_page = MainApplicationPage(self.master, self)
+        self.controller.main_application_page.draw()
+        self.master.update_idletasks()
+        #
+        self.order_query_page = self.controller.main_application_page.order_query_page
+        #
+        self.pumpe_messung_template_file_path = "../data/Pumpe_Messung_template.xlsx"
+        self.pumpe_messung_template_length = 9
+
+        # 导入数据
+        mock_askopenfilename.return_value = self.pumpe_messung_template_file_path
+        file_path = mock_askopenfilename.return_value
+        # 调用函数并断言返回值
+        self.assertEquals(file_path, self.pumpe_messung_template_file_path)
+        # Simulate button click
+        self.order_query_page.import_button.invoke()
+        # 验证 askopenfilename 被调用
+        mock_askopenfilename.assert_called_once()
+        # 检查第一次 showinfo 被调用，并且传递了正确的参数
+        first_call_args = mock_showinfo.call_args_list[0]
+        first_call_args.assert_called_once_with("Success", "File imported successfully!")
+        # 断言 tree 存在并且长度等于导入数据的长度
+        order_query_page_tree_winfo_exists = self.order_query_page.tree.winfo_exists()
+        self.assertEquals(order_query_page_tree_winfo_exists, True)
+        tree_length = len(self.order_query_page.tree.get_children())
+        self.assertEquals(tree_length, self.pumpe_messung_template_length)
+
+    def tearDown(self):
+        # 延时销毁以避免 TclError
+        self.master.after(100, self.master.destroy)
+        # 确保足够的时间完成操作
+        time.sleep(0.1)
+        # 停止主循环
+        self.master.quit()
+        # 销毁主窗口
+        self.master.destroy()
+
+    def test_double_click_event(self):
+        """Test double click event."""
+        # 模拟一个双击事件
+        # 获取第一个项目的 ID
+        first_item = self.order_query_page.tree.get_children()[0]
+
+        # 设置焦点到第一个项目
+        self.order_query_page.tree.focus(first_item)
+        self.order_query_page.tree.selection_set(first_item)
+
+        # 触发双击事件
+        # 创建一个模拟的事件对象
+        mock_event = Mock()
+        mock_event.widget = self.order_query_page.tree
+        result = self.order_query_page.on_row_double_click(mock_event)
+        # 验证结果
+        self.assertEqual(result, None)
+        self.edit_window = self.order_query_page.edit_window
+        self.assertTrue(self.edit_window.winfo_exists())
+
+        # 验证选中的项是否正确
+        selected_items = self.order_query_page.tree.selection()
+        self.assertEqual(len(selected_items), 1)
+        self.assertEqual(selected_items[0], first_item)
+
+        # 验证选中项的值
+        item_values = self.order_query_page.tree.item(first_item, "values")
+        self.assertEqual(item_values, ('AP1', '0390202450', '2023-06-06', '0', 'N01', '0 140 Y00 1LX'))
+
     def test_detail_page_elements(self):
-        """Test if detail page elements are correct."""
+        """Test if detail page elements are present."""
+        # 获取第一个项目的 ID
+        first_item = self.order_query_page.tree.get_children()[0]
+        # 设置焦点到第一个项目
+        self.order_query_page.tree.focus(first_item)
+        self.order_query_page.tree.selection_set(first_item)
+        # 触发双击事件
+        # 创建一个模拟的事件对象
+        mock_event = Mock()
+        mock_event.widget = self.order_query_page.tree
+        self.order_query_page.on_row_double_click(mock_event)
+        # 验证选中的项是否正确
+        selected_items = self.order_query_page.tree.selection()
+        self.assertEqual(len(selected_items), 1)
+        self.assertEqual(selected_items[0], first_item)
+        # 验证选中项的值
+        item_values = self.order_query_page.tree.item(first_item, "values")
+        self.assertEqual(item_values, ('AP1', '0390202450', '2023-06-06', '0', 'N01', '0 140 Y00 1LX'))
+
+        # 断言详情页内容
+        edit_window_winfo_exists = self.order_query_page.edit_window.winfo_exists()
+        self.assertEquals(edit_window_winfo_exists, True)
+
+        # 断言详情页button_frame是否存在
+        edit_window_button_frame_exists = self.order_query_page.button_frame.winfo_exists()
+        self.assertEquals(edit_window_button_frame_exists, True)
+
+        # 断言详情页generate_user_doc_button按钮
+        edit_window_generate_user_doc_button_exists = self.order_query_page.generate_user_doc_button.winfo_exists()
+        self.assertEquals(edit_window_generate_user_doc_button_exists, True)
+        edit_window_generate_user_doc_button_state = self.order_query_page.generate_user_doc_button.cget('state')
+        self.assertEquals(edit_window_generate_user_doc_button_state, "enable")
+
+        # 断言详情页start_measurement_button按钮
+        edit_window_start_measurement_button_exists = self.order_query_page.start_measurement_button.winfo_exists()
+        self.assertEquals(edit_window_start_measurement_button_exists, True)
+        edit_window_start_measurement_button_state = self.order_query_page.start_measurement_button.cget('state').string
+        self.assertEquals(edit_window_start_measurement_button_state, "disable")
+
+    def test_generate_user_doc(self):
+        """Test generate user doc."""
+        pass
+
+    def test_start_measurement(self):
+        """Test start measurement."""
         pass
 
 
 if __name__ == "__main__":
     unittest.main()
-
 
 #
 # class TestPoisonDartCase(unittest.TestCase):
