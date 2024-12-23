@@ -607,21 +607,94 @@ class TestDetailPage(unittest.TestCase):
         edit_window_generate_user_doc_button_exists = self.order_query_page.generate_user_doc_button.winfo_exists()
         self.assertEquals(edit_window_generate_user_doc_button_exists, True)
         edit_window_generate_user_doc_button_state = self.order_query_page.generate_user_doc_button.cget('state')
+        if not isinstance(edit_window_generate_user_doc_button_state, str):
+            edit_window_generate_user_doc_button_state = edit_window_generate_user_doc_button_state.string
         self.assertEquals(edit_window_generate_user_doc_button_state, "enable")
 
         # 断言详情页start_measurement_button按钮
         edit_window_start_measurement_button_exists = self.order_query_page.start_measurement_button.winfo_exists()
         self.assertEquals(edit_window_start_measurement_button_exists, True)
-        edit_window_start_measurement_button_state = self.order_query_page.start_measurement_button.cget('state').string
+        edit_window_start_measurement_button_state = self.order_query_page.start_measurement_button.cget('state')
+        if not isinstance(edit_window_start_measurement_button_state, str):
+            edit_window_start_measurement_button_state = edit_window_start_measurement_button_state.string
         self.assertEquals(edit_window_start_measurement_button_state, "disable")
 
-    def test_generate_user_doc(self):
+    @patch("tkinter.messagebox.showinfo")
+    def test_generate_user_doc(self, mock_showinfo):
         """Test generate user doc."""
-        pass
+        # 获取第一个项目的 ID
+        first_item = self.order_query_page.tree.get_children()[0]
+        # 设置焦点到第一个项目
+        self.order_query_page.tree.focus(first_item)
+        self.order_query_page.tree.selection_set(first_item)
+        # 触发双击事件
+        # 创建一个模拟的事件对象
+        mock_event = Mock()
+        mock_event.widget = self.order_query_page.tree
+        self.order_query_page.on_row_double_click(mock_event)
+        # 验证选中的项是否正确
+        selected_items = self.order_query_page.tree.selection()
+        self.assertEqual(len(selected_items), 1)
+        self.assertEqual(selected_items[0], first_item)
+        # 验证选中项的值
+        item_values = self.order_query_page.tree.item(first_item, "values")
+        self.assertEqual(item_values, ('AP1', '0390202450', '2023-06-06', '0', 'N01', '0 140 Y00 1LX'))
+
+        # 断言导出成功
+        self.order_query_page.generate_user_doc_button.invoke()
+        # 检查第一次 showinfo 被调用，并且传递了正确的参数
+        first_call_args = mock_showinfo.call_args_list[0]
+        first_call_args.assert_called_once_with("Success", f"File exported successfully! {self.order_query_page.pump_template_path}")
+
+        # 断言generate_user_doc_button按钮状态
+        edit_window_generate_user_doc_button_state = self.order_query_page.generate_user_doc_button.cget('state')
+        if not isinstance(edit_window_generate_user_doc_button_state, str):
+            edit_window_generate_user_doc_button_state = edit_window_generate_user_doc_button_state.string
+        self.assertEquals(edit_window_generate_user_doc_button_state, "disable")
+
+        # 断言start_measurement_button按钮状态
+        edit_window_start_measurement_button_state = self.order_query_page.start_measurement_button.cget('state')
+        if not isinstance(edit_window_start_measurement_button_state, str):
+            edit_window_start_measurement_button_state = edit_window_start_measurement_button_state.string
+        self.assertEquals(edit_window_start_measurement_button_state, "enable")
 
     def test_start_measurement(self):
         """Test start measurement."""
-        pass
+        # 获取第一个项目的 ID
+        first_item = self.order_query_page.tree.get_children()[0]
+        # 设置焦点到第一个项目
+        self.order_query_page.tree.focus(first_item)
+        self.order_query_page.tree.selection_set(first_item)
+        # 触发双击事件
+        # 创建一个模拟的事件对象
+        mock_event = Mock()
+        mock_event.widget = self.order_query_page.tree
+        self.order_query_page.on_row_double_click(mock_event)
+        # 验证选中的项是否正确
+        selected_items = self.order_query_page.tree.selection()
+        self.assertEqual(len(selected_items), 1)
+        self.assertEqual(selected_items[0], first_item)
+        # 验证选中项的值
+        item_values = self.order_query_page.tree.item(first_item, "values")
+        self.assertEqual(item_values, ('AP1', '0390202450', '2023-06-06', '0', 'N01', '0 140 Y00 1LX'))
+
+        # 断言measurement完成
+        self.order_query_page.start_measurement_button.invoke()
+        # 检查第一次 showinfo 被调用，并且传递了正确的参数
+        first_call_args = self.mock_showinfo.call_args_list[0]
+        first_call_args.assert_called_once_with("Success", "Measurement completed!")
+
+        # 断言start_measurement_button按钮状态
+        edit_window_start_measurement_button_state = self.order_query_page.start_measurement_button.cget('state')
+        if not isinstance(edit_window_start_measurement_button_state, str):
+            edit_window_start_measurement_button_state = edit_window_start_measurement_button_state.string
+        self.assertEquals(edit_window_start_measurement_button_state, "disable")
+
+        # 断言generate_user_doc_button按钮状态
+        edit_window_generate_user_doc_button_state = self.order_query_page.generate_user_doc_button.cget('state')
+        if not isinstance(edit_window_generate_user_doc_button_state, str):
+            edit_window_generate_user_doc_button_state = edit_window_generate_user_doc_button_state.string
+        self.assertEquals(edit_window_generate_user_doc_button_state, "enable")
 
 
 if __name__ == "__main__":
