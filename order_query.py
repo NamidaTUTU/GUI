@@ -788,6 +788,8 @@ class OrderQueryPage(BasePage):
         self.start_measurement_button.config(
             state=self.button_click_mapping.get(data_dict["Prüfling-Nr"], {}).get("start_measurement_button",
                                                                                   "disable"))
+        # 设置窗口始终置顶
+        self.edit_window.attributes('-topmost', True)
         # import clr
         # import System
         # import sys
@@ -1030,41 +1032,6 @@ class OrderQueryPage(BasePage):
         # 释放许可证
         license_.Dispose()
 
-    # def measurement(self, data_dict):
-    #     print("measurement method executing")
-    #     import clr
-    #     import sys
-    #
-    #     sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
-    #     clr.AddReference('HEADacoustics.API.Remote')
-    #     clr.AddReference('HEADacoustics.API.License')
-    #
-    #     import HEADacoustics.API.Remote as ASX02
-    #     from HEADacoustics.API.Remote import Recorder as ASX04
-    #     from HEADacoustics.API.License import License, ProductCode
-    #
-    #     license_ = License.Create([ProductCode.ASX_04_DataAcquisitionAPI])
-    #
-    #     remoteClient = ASX02.ASXRemote.ForLatestApplication(True)
-    #     if not remoteClient.StandAloneRecorder.IsAvailable:
-    #         artemisSuiteClient = remoteClient.StandAloneRecorder.Start('/nolic').Wait()
-    #
-    #     recorder = remoteClient.Application.Recorder
-    #
-    #     # availFrontEnds = recorder.GetControlService().GetAvailableFrontends()
-    #     Path = r'\\head-tfs\TFSBinaries\Support\73183\Recorder Configuration.hrcx'
-    #
-    #     recorder.GetConfigurationService().LoadTrigger(Path)
-    #
-    #     startTrigger = recorder.GetTriggerService().SetStartSignalTrigger(0, ASX04.SlopeType.Falling, 'testa', 1.0)
-    #     # print(startTrigger)
-    #     # 这里使用 data["Prüfling-Nr"] 进行命名
-    #     recorder.GetControlService().SetFileNamePattern('Rising_Slope_Axis1_01.hdf')
-    #     recorder.GetTriggerService().SetStopDurationTrigger(0, 10)
-    #     recorder.GetControlService().StartRecord()
-    #
-    #     license_.Dispose()
-
     def measurement(self, data_dict):
         print("measurement method executing")
         import clr
@@ -1080,22 +1047,24 @@ class OrderQueryPage(BasePage):
 
         license_ = License.Create([ProductCode.ASX_04_DataAcquisitionAPI])
 
-        remoteClient = ASX02.ASXRemote.ForLatestApplication(True)
-        if not remoteClient.StandAloneRecorder.IsAvailable:
-            artemisSuiteClient = remoteClient.StandAloneRecorder.Start('/nolic').Wait()
+        remoteClient = ASX02.ArtemiSuiteRemote.ForLatestApplication(True)
+        if not remoteClient.Application.IsAvailable:
+            artemisSuiteClient = remoteClient.Application.Start('/nolic').Wait()
 
         recorder = remoteClient.Application.Recorder
 
         # availFrontEnds = recorder.GetControlService().GetAvailableFrontends()
-        Path = r'C:\test_recording\Recorder Configuration (4 Mikro + 2 Traix).hrcx'
+        Path = r'C:\Users\CHX1BUE\Documents\Recorder Configuration.hrcx'
         recorder.GetConfigurationService().LoadAll(Path)
         # recorder.GetConfigurationService().LoadTrigger(Path)
         # startTrigger = recorder.GetTriggerService().SetStartSignalTrigger(0, ASX04.SlopeType.Falling, 'testa', 1.0)
         # print(startTrigger)
         # 这里使用 data["Prüfling-Nr"] 进行命名
         pruefling_nr = data_dict.get("Prüfling-Nr", "default_pruefling_nr")
-        file_path = rf'C:\temp\{pruefling_nr}.hdf'
-        recorder.GetControlService().SetFileNamePattern(file_path)
+        recorder.GetControlService().GetBseDirectory("C:\\temp\\")
+        filename = f'{pruefling_nr}.hdf'
+        recorder.GetControlService().SetFileNamePattern(filename)##这里我测试了一下这里是文件名得指定在这之前需要有文件夹路径得指定，格式如下
+        #tip:path = recorder.GetControlService().GetBseDirectory()
 
         test_duration = data_dict.get("Testdauer")
         if test_duration is None:
@@ -1107,4 +1076,60 @@ class OrderQueryPage(BasePage):
         recorder.GetTriggerService().SetStopDurationTrigger(0, test_duration)
         recorder.GetControlService().StartRecord()
 
+        license_.Dispose()
+
+        # 生成hdf文件后,调用ASX分析
+        self.call_asx_analyzize(data_dict)
+
+    def call_asx_analyzize(self, data_dict):
+        import clr
+        from time import sleep
+        import sys
+        from System import Action, String
+
+        sys.path.append(r'C:\Program Files\HEAD System Integration and Extension (ASX)')
+        clr.AddReference('HEADacoustics.API.Remote')
+        clr.AddReference('HEADacoustics.API.License')
+
+        import HEADacoustics.API.Remote as ASX02
+        from HEADacoustics.API.License import License, ProductCode
+
+        inputRoutine = r'C:\Users\tingting.jordans\Documents\Beispieldateien\ASX\FFT.hpsx'
+        inputData = r'C:\Users\tingting.jordans\Documents\Beispieldateien\Training\01 Führungsgrößen\CAN'
+        resultPath = r'C:\Users\tingting.jordans\Documents\Beispieldateien\Training\01 Führungsgrößen\CAN\results'
+        prod = '*'
+
+        def __onJobFinished(jobName, jobSummary):
+            if jobSummary.Processes:
+                for process in jobSummary.Processes:
+                    print(f'Finished calculating {jobName} --- {process.Name}')
+
+                    if process.Errors:
+                        for error in process.Errors:
+                            print(f'Error {error} occurred in {jobName} --- {process.Name}')
+            else:
+                print(f'There are no processes in {jobName}!')
+
+        def __onJobProgress(jobName, jobProgress):
+            if jobProgress:
+                print(f'Calculation of {jobName} is at {jobProgress.PercentComplete}%')
+
+
+        license_ = License.Create([ProductCode.ASX_02_DataProcessingAndRepresentationAPI])
+
+        remoteClient = ASX02.ASXRemote.ForLatestApplication(True)
+        if not remoteClient.Calculator.IsAvailable:
+            remoteClient.Calculator.Start(f'/prod {prod}').Wait()
+
+        delegSummary = Action[String, ASX02.JobSummary](__onJobFinished)
+        delegProgress = Action[String, ASX02.JobProgress](__onJobProgress)
+        processingService = remoteClient.Calculator.GetProcessingService(delegSummary,
+                                                                         delegProgress)
+
+        processingService.StartJob('MyJobName', inputRoutine, resultPath, [inputData])
+        while len(processingService.GetRunningJobs()) > 0:
+            sleep(1)
+
+        ###################################################################### wichtig! im Beispielcode ist es nicht da, daher funktioniert es nicht#########################################################################
+        sleep(20)
         license_.Dispose()
