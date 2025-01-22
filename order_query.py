@@ -149,8 +149,8 @@ class OrderQueryPage(BasePage):
         self.font = ("Arial", 12)
         self.title_font = ('Arial', 14, 'bold')
         #
-        self.pump_documentation_path = r'C:\temp\pump_documentation.hatx'
-        self.pump_template_path = r'C:\temp\pump_template.hatx'
+        self.pump_documentation_path = r'C:\temp\{}_pump_documentation.hatx'
+        self.pump_template_path = r'C:\temp\{}_pump_template.hatx'
         #
         self.edit_window = None
         self.button_frame = None
@@ -775,7 +775,7 @@ class OrderQueryPage(BasePage):
         print(data_dict)
         self.create_pump_documentation(data_dict)
         self.create_pump_template(data_dict)
-        messagebox.showinfo("Success", f"File exported successfully! {self.pump_template_path}")
+        messagebox.showinfo("Success", f"File exported successfully! {self.pump_template_path.format(data_dict['Prüfling-Nr'])}")
         # 改变按钮状态
         if data_dict["Prüfling-Nr"] in self.button_click_mapping:
             self.button_click_mapping[data_dict["Prüfling-Nr"]]["generate_user_doc_button"] = "disable"
@@ -927,7 +927,7 @@ class OrderQueryPage(BasePage):
         license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
 
         # 定义文件路径
-        out_path = self.pump_documentation_path
+        out_path = self.pump_documentation_path.format(data_dict.get('Prüfling-Nr'))
 
         # 创建新的文档
         in_doc = ASX05.Documentation.Create('Dokumentation')
@@ -970,8 +970,8 @@ class OrderQueryPage(BasePage):
         license_ = License.Create([ProductCode.ASX_05_DocumentationAndMetadataAPI])
 
         # 定义路径
-        in_path = self.pump_documentation_path
-        out_path = self.pump_template_path
+        in_path = self.pump_documentation_path.format(data_dict.get('Prüfling-Nr'))
+        out_path = self.pump_template_path.format(data_dict.get('Prüfling-Nr'))
 
         # 读取文档
         in_doc = ASX05.TemplateReader.Read(in_path)
