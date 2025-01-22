@@ -1082,6 +1082,18 @@ class OrderQueryPage(BasePage):
         self.call_asx_analyzize(data_dict)
 
     def call_asx_analyzize(self, data_dict):
+
+        luftschall_mebabstand = float(data_dict.get('Luftschall - Meßabstand', '0'))
+        umgerechnet_auf = float(data_dict.get('umgerechnet auf', '0'))
+        luftschall_summe_startfrequenz = float(data_dict.get('Luftschall-Summe-Startfrequenz', '0'))
+        luftschall_summe_endfrequenz = float(data_dict.get('Luftschall-Summe-Endfrequenz', '0'))
+        luftschall_terz_startfrequenz = float(data_dict.get('Luftschall-Terz-Startfrequenz', '0'))
+        luftschall_terz_endfrequenz = float(data_dict.get('Luftschall-Terz-Endfrequenz', '0'))
+
+        variableDefinition = [luftschall_mebabstand, umgerechnet_auf,
+                              luftschall_summe_startfrequenz, luftschall_summe_endfrequenz,
+                              luftschall_terz_startfrequenz, luftschall_terz_endfrequenz]
+
         import clr
         from time import sleep
         import sys
